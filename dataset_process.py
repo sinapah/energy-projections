@@ -30,15 +30,17 @@ for file in energy_files:
     energy_dfs.append(df)
 
 energy_data = pd.concat(energy_dfs, ignore_index=True)
-
+print(energy_data.shape)
 # Step 2: Load weather data and merge
 for weather_file in weather_files:
-    print(weather_file)
+
     city_name = os.path.basename(weather_file).replace("weatherstats_", "").replace("_hourly.csv", "")
     
     weather_df = pd.read_csv(weather_file)
-    weather_df["DateTime"] = pd.to_datetime(weather_df["date_time_local"], errors="coerce")  # Convert to datetime
     
+    weather_df["DateTime"] = pd.to_datetime(weather_df["date_time_local"].str.replace("EDT", "EST"), errors="coerce")  # Convert to datetime
+
+
     if weather_df["DateTime"].dt.tz is None:
         # If naive, first localize to CST/CDT (America/Chicago)
         weather_df["DateTime"] = weather_df["DateTime"].dt.tz_localize("America/Chicago", ambiguous="NaT", nonexistent="shift_forward")
@@ -46,12 +48,15 @@ for weather_file in weather_files:
     # Convert to America/Toronto (EST/EDT)
     weather_df["DateTime"] = weather_df["DateTime"].dt.tz_convert("America/Toronto")
     
+    print(weather_df.isna().head())
+    
     weather_df = weather_df[["DateTime", "temperature", "windchill"]]  # Keep necessary columns
     weather_df.rename(columns={"temperature": f"{city_name}_temp", "windchill": f"{city_name}_windchill"}, inplace=True)
     weather_df = weather_df.dropna(subset=["DateTime"])
+    
     # Merge with energy data using inner join to ensure both datasets have matching DateTime
     energy_data = pd.merge(energy_data, weather_df, on="DateTime", how="inner")
-
+    
 # Step 3: Sort by DateTime
 energy_data = energy_data.sort_values(by="DateTime")
 

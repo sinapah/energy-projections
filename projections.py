@@ -17,6 +17,14 @@ from sklearn.svm import SVR
 # Load the merged dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 
+# Get count of NaNs
+nan_count = df.isna().sum()
+
+print(nan_count)
+
+# Print dimensions of DF
+print(df.shape)
+
 # Extract time-based features
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)  # Ensure it's datetime
 df["DateTime"] = df["DateTime"].dt.tz_localize(None)  # Remove timezone
