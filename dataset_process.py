@@ -49,11 +49,11 @@ for weather_file in weather_files:
     weather_df = weather_df[["DateTime", "temperature", "windchill"]]  # Keep necessary columns
     weather_df.rename(columns={"temperature": f"{city_name}_temp", "windchill": f"{city_name}_windchill"}, inplace=True)
     weather_df = weather_df.dropna(subset=["DateTime"])
-    # Merge with energy data
-    energy_data = pd.merge_asof(energy_data.sort_values("DateTime"), 
-                                weather_df.sort_values("DateTime"), 
-                                on="DateTime", 
-                                direction="nearest")  # Get closest match
+    # Merge with energy data using inner join to ensure both datasets have matching DateTime
+    energy_data = pd.merge(energy_data, weather_df, on="DateTime", how="inner")
+
+# Step 3: Sort by DateTime
+energy_data = energy_data.sort_values(by="DateTime")
 
 # Step 3: Save final dataset
 energy_data.to_csv("merged_energy_weather.csv", index=False)
