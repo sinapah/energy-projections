@@ -13,6 +13,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.svm import SVR
+from sklearn.preprocessing import StandardScaler
 
 # Load the merged dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -21,9 +22,6 @@ df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 nan_count = df.isna().sum()
 
 print(nan_count)
-
-# Print dimensions of DF
-print(df.shape)
 
 # Extract time-based features
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)  # Ensure it's datetime
@@ -35,6 +33,10 @@ df["DayOfWeek"] = df["DateTime"].dt.dayofweek
 
 # (Optional) Create a binary feature for weekends
 df["IsWeekend"] = df["DayOfWeek"].isin([5, 6]).astype(int)
+
+df = df.dropna()
+nan_count = df.isna().sum()
+print(nan_count)
 
 # Drop non-numeric columns
 df = df.drop(columns=["DateTime"])
@@ -61,5 +63,3 @@ r2 = r2_score(y_test, y_pred)
 print(f"MAE: {mae:.2f}")
 print(f"RMSE: {rmse:.2f}")
 print(f"R² Score: {r2:.4f}")
-
-
