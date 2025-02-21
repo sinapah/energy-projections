@@ -58,5 +58,17 @@ for weather_file in weather_files:
 # Step 3: Sort by DateTime
 energy_data = energy_data.sort_values(by="DateTime")
 
+# Extract time-based features
+energy_data["DateTime"] = pd.to_datetime(energy_data["DateTime"], utc=True)  # Ensure it's datetime
+energy_data["DateTime"] = energy_data["DateTime"].dt.tz_localize(None)  # Remove timezone
+
+energy_data["Hour"] = energy_data["DateTime"].dt.hour
+energy_data["Month"] = energy_data["DateTime"].dt.month
+energy_data["Day"] = energy_data["DateTime"].dt.day
+energy_data["DayOfWeek"] = energy_data["DateTime"].dt.dayofweek
+
+# (Optional) Create a binary feature for weekends
+energy_data["IsWeekend"] = energy_data["DayOfWeek"].isin([5, 6]).astype(int)
+
 # Step 3: Save final dataset
 energy_data.to_csv("merged_energy_weather.csv", index=False)

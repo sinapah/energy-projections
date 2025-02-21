@@ -23,17 +23,6 @@ nan_count = df.isna().sum()
 
 print(nan_count)
 
-# Extract time-based features
-df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)  # Ensure it's datetime
-df["DateTime"] = df["DateTime"].dt.tz_localize(None)  # Remove timezone
-
-df["Hour"] = df["DateTime"].dt.hour
-df["Month"] = df["DateTime"].dt.month
-df["DayOfWeek"] = df["DateTime"].dt.dayofweek
-
-# (Optional) Create a binary feature for weekends
-df["IsWeekend"] = df["DayOfWeek"].isin([5, 6]).astype(int)
-
 df = df.dropna()
 nan_count = df.isna().sum()
 print(nan_count)
@@ -45,6 +34,9 @@ df = df.drop(columns=["DateTime"])
 X = df.drop(columns=["Ontario Demand"])  # Features (weather, time)
 y = df["Ontario Demand"]  # Target (energy demand)
 
+for col in df:
+    print(f"Column {col}: {df[col].unique()}")
+    
 # Split into 80% training, 20% testing
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
