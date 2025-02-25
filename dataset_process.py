@@ -9,10 +9,14 @@ Created on Tue Feb 18 18:09:44 2025
 import pandas as pd
 import glob
 import os
+import holidays
 
 # Define file paths
 energy_files = glob.glob("demand stats/*.csv")  # Adjust path
 weather_files = glob.glob("weather stats/*.csv")  # Adjust path
+
+# Load Ontario holidays
+ontario_holidays = holidays.Canada(subdiv="ON")
 
 # Step 1: Load and concatenate energy data
 energy_dfs = []
@@ -69,6 +73,8 @@ energy_data["DayOfWeek"] = energy_data["DateTime"].dt.dayofweek
 
 # (Optional) Create a binary feature for weekends
 energy_data["IsWeekend"] = energy_data["DayOfWeek"].isin([5, 6]).astype(int)
+
+energy_data["IsHoliday"] = energy_data["DateTime"].dt.date.apply(lambda x: 1 if x in ontario_holidays else 0)
 
 # Step 3: Save final dataset
 energy_data.to_csv("merged_energy_weather.csv", index=False)
