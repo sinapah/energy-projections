@@ -28,7 +28,7 @@ df = df.dropna()
 datetime_col = df["DateTime"]
 
 # Extract features and target variable
-X = df.drop(columns=["DateTime", "Ontario Demand", "HOEP"])  # Features
+X = df.drop(columns=["DateTime", "Ontario Demand"])  # Features
 y = df["Ontario Demand"]  # Target variable
 
 
@@ -99,6 +99,7 @@ results_df = pd.DataFrame({
     "Predicted_ANN": y_pred_ann
 })
 
+results_df = results_df.sort_values(by="DateTime")
 results_df.to_csv("prediction_results_comparison.csv", index=False)
 
 # ============================

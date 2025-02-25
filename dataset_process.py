@@ -40,7 +40,7 @@ print(energy_data.shape)
 price_dfs = []
 for file in price_files:
     df = pd.read_csv(file, skiprows=3)
-    
+
     df["Hour"] = df["Hour"].replace(24, 0)  # Convert 24 to 0
     df["Date"] = pd.to_datetime(df["Date"])  # Convert to datetime first
     df["Date"] = df.apply(lambda row: row["Date"] + pd.Timedelta(days=1) if row["Hour"] == 0 else row["Date"], axis=1)
@@ -50,12 +50,16 @@ for file in price_files:
     df = df[["DateTime", "HOEP"]]
     df = df.dropna(subset=["DateTime"]) # dropping na for datetime. Created on line 26.
     price_dfs.append(df)
-
+    
 price_data = pd.concat(price_dfs, ignore_index=True)
+
+# Ensure no comma in price column
+price_data["HOEP"] = price_data["HOEP"].astype(str).str.replace(",", "", regex=False).astype(float)
 
 energy_data = pd.merge(energy_data, price_data, on="DateTime", how="inner")
 
 print(energy_data.shape)
+
 
 for weather_file in weather_files:
 
@@ -102,9 +106,6 @@ energy_data["BusinessHour"] = ((energy_data["Hour"] >= 8) &
                                (energy_data["Hour"] <= 17) & 
                                (energy_data["IsWeekend"] == 0) & 
                                (energy_data["IsHoliday"] == 0)).astype(int)
-
-# Ensure no commas in price column
-energy_data['HOEP'] = energy_data['HOEP'].str.replace(',', '').astype(float)
 
 # Step 3: Save final dataset
 energy_data.to_csv("merged_energy_weather.csv", index=False)
