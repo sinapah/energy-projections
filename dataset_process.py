@@ -76,5 +76,11 @@ energy_data["IsWeekend"] = energy_data["DayOfWeek"].isin([5, 6]).astype(int)
 
 energy_data["IsHoliday"] = energy_data["DateTime"].dt.date.apply(lambda x: 1 if x in ontario_holidays else 0)
 
+# Define business hours (8 AM to 5 PM) only on non-holidays and non-weekends
+energy_data["BusinessHour"] = ((energy_data["Hour"] >= 8) & 
+                               (energy_data["Hour"] <= 17) & 
+                               (energy_data["IsWeekend"] == 0) & 
+                               (energy_data["IsHoliday"] == 0)).astype(int)
+
 # Step 3: Save final dataset
 energy_data.to_csv("merged_energy_weather.csv", index=False)

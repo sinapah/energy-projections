@@ -59,7 +59,7 @@ print(f"RMSE: {rmse_dt:.2f}")
 print(f"R² Score: {r2_dt:.4f}")
 
 # ============================
-# 📌 ANN Model (Neural Network)
+# ANN Model (Neural Network)
 # ============================
 
 # Define ANN architecture
@@ -89,7 +89,7 @@ print(f"RMSE: {rmse_ann:.2f}")
 print(f"R² Score: {r2_ann:.4f}")
 
 # ============================
-# 📌 Save Results to CSV
+# Save Results to CSV
 # ============================
 results_df = pd.DataFrame({
     "DateTime": datetime_test.values,
