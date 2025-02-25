@@ -28,8 +28,9 @@ df = df.dropna()
 datetime_col = df["DateTime"]
 
 # Extract features and target variable
-X = df.drop(columns=["DateTime", "Ontario Demand"])  # Features
+X = df.drop(columns=["DateTime", "Ontario Demand", "HOEP"])  # Features
 y = df["Ontario Demand"]  # Target variable
+
 
 # Split data into training and testing sets (80-20 split)
 X_train, X_test, y_train, y_test, datetime_train, datetime_test = train_test_split(
