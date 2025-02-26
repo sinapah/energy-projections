@@ -13,10 +13,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
-import tensorflow as tf
-from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
+from tensorflow.keras.models import load_model
+
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -28,7 +28,7 @@ df = df.dropna()
 datetime_col = df["DateTime"]
 
 # Extract features and target variable
-X = df.drop(columns=["DateTime", "Ontario Demand"])  # Features
+X = df.drop(columns=["DateTime", "Ontario Demand", "Market Demand"])  # Features
 y = df["Ontario Demand"]  # Target variable
 
 
@@ -75,6 +75,8 @@ ann_model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
 history = ann_model.fit(X_train_scaled, y_train, epochs=50, batch_size=32, validation_data=(X_test_scaled, y_test), verbose=1)
+
+ann_model.save("ann_energy_model.h5")
 
 # Make predictions using ANN
 y_pred_ann = ann_model.predict(X_test_scaled).flatten()
