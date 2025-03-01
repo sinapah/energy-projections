@@ -15,8 +15,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import Dense
-from tensorflow.keras.models import load_model
-
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
