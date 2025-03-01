@@ -15,6 +15,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import Dense
+import joblib
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -38,7 +39,12 @@ X_train, X_test, y_train, y_test, datetime_train, datetime_test = train_test_spl
 # Standardize features for ANN (Decision Tree doesn't need this)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
+
+# Save the trained scaler to a file
+joblib.dump(scaler, "scaler.pkl")
+
 X_test_scaled = scaler.transform(X_test)
+
 
 # ============================
 # 📌 Decision Tree Model

@@ -11,12 +11,14 @@ import numpy as np
 from tensorflow.keras.models import load_model
 import datetime
 import holidays
+import joblib
 
 # Load Ontario holidays
 ontario_holidays = holidays.Canada(subdiv="ON")
 
 # Load the trained ANN model
 model = load_model("ann_energy_model.h5")
+print(model.summary())  # Check model structure
 
 def predict_energy_demand(future_datetime, historical_data, model):
     historical_data["DateTime"] = pd.to_datetime(historical_data["DateTime"])
@@ -65,7 +67,7 @@ def predict_energy_demand(future_datetime, historical_data, model):
         **future_features  # Include time-based features
     }
     print(input_features)
-    print(input_features.keys())
+
     # Columns to exclude from the input features
     excluded_columns = ["DateTime", "Market Demand", "Ontario Demand"]
 
@@ -75,8 +77,12 @@ def predict_energy_demand(future_datetime, historical_data, model):
     # Ensure only relevant columns are used in input_features
     input_array = np.array([[input_features[col] for col in feature_columns]])
     
+    scaler = joblib.load("scaler.pkl")
+    
+    x_scaled = scaler.transform(input_array)
+    
     # Make prediction
-    predicted_demand = model.predict(input_array)[0, 0]
+    predicted_demand = model.predict(x_scaled)[0, 0]
     return predicted_demand
 
 historical_data = pd.read_csv("merged_energy_weather.csv")  # Load dataset
@@ -93,6 +99,11 @@ prediction = predict_energy_demand(future_dt, historical_data, model)
 print(f"Predicted energy demand for {future_dt}: {prediction}")
 
 future_dt = datetime.datetime(2022, 2, 27, 15)  # Predict for Feb 27, 2025, at 3 PM
+
+prediction = predict_energy_demand(future_dt, historical_data, model)
+print(f"Predicted energy demand for {future_dt}: {prediction}")
+
+future_dt = datetime.datetime(2020, 1, 27, 18)  # Predict for Feb 27, 2025, at 3 PM
 
 prediction = predict_energy_demand(future_dt, historical_data, model)
 print(f"Predicted energy demand for {future_dt}: {prediction}")
