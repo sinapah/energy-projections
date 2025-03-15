@@ -16,6 +16,7 @@ from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import Dense
 import joblib
+from sklearn.svm import SVR
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -97,19 +98,6 @@ print(f"RMSE: {rmse_ann:.2f}")
 print(f"R² Score: {r2_ann:.4f}")
 
 # ============================
-# Save Results to CSV
-# ============================
-results_df = pd.DataFrame({
-    "DateTime": datetime_test.values,
-    "Actual_Ontario_Demand": y_test.values,
-    "Predicted_DT": y_pred_dt,
-    "Predicted_ANN": y_pred_ann
-})
-
-results_df = results_df.sort_values(by="DateTime")
-results_df.to_csv("prediction_results_comparison.csv", index=False)
-
-# ============================
 # 📊 Plot Actual vs Predicted Demand (ANN & DT)
 # ============================
 plt.figure(figsize=(12, 6))
@@ -150,3 +138,73 @@ plt.title("ANN Training Loss vs. Epochs")
 plt.legend()
 plt.grid()
 plt.show()
+
+# ============================
+# 📌 Support Vector Machine (SVM) Model
+# ============================
+svm_model = SVR(kernel='rbf', C=100, gamma=0.1, epsilon=0.1)
+svm_model.fit(X_train_scaled, y_train)
+
+# Make predictions
+y_pred_svm = svm_model.predict(X_test_scaled)
+
+# Compute evaluation metrics
+mae_svm = mean_absolute_error(y_test, y_pred_svm)
+rmse_svm = np.sqrt(mean_squared_error(y_test, y_pred_svm))
+r2_svm = r2_score(y_test, y_pred_svm)
+
+print("\n📊 SVM Model Performance:")
+print(f"MAE: {mae_svm:.2f}")
+print(f"RMSE: {rmse_svm:.2f}")
+print(f"R² Score: {r2_svm:.4f}")
+
+# ============================
+# Save Results to CSV
+# ============================
+results_df = pd.DataFrame({
+    "DateTime": datetime_test.values,
+    "Actual_Ontario_Demand": y_test.values,
+    "Predicted_SVM": y_pred_svm
+})
+
+results_df = results_df.sort_values(by="DateTime")
+results_df.to_csv("svm_prediction_results.csv", index=False)
+
+# ============================
+# 📊 Plot Actual vs Predicted Demand (SVM)
+# ============================
+plt.figure(figsize=(12, 6))
+
+# Sort values for proper time-series plotting
+sorted_indices = np.argsort(datetime_test)
+sorted_dates = np.array(datetime_test)[sorted_indices]
+sorted_actual = np.array(y_test)[sorted_indices]
+sorted_predicted_svm = np.array(y_pred_svm)[sorted_indices]
+
+# Plot actual demand
+plt.plot(sorted_dates, sorted_actual, label="Actual Demand", color="blue", linewidth=2)
+
+# Plot SVM predictions
+plt.plot(sorted_dates, sorted_predicted_svm, label="SVM Prediction", color="purple", linestyle="dashed", linewidth=2)
+
+plt.xlabel("DateTime")
+plt.ylabel("Ontario Energy Demand")
+plt.title("Actual vs Predicted Energy Demand (SVM)")
+plt.legend()
+plt.xticks(rotation=45)
+plt.grid()
+plt.show()
+
+# ============================
+# Save Results to CSV
+# ============================
+results_df = pd.DataFrame({
+    "DateTime": datetime_test.values,
+    "Actual_Ontario_Demand": y_test.values,
+    "Predicted_DT": y_pred_dt,
+    "Predicted_ANN": y_pred_ann,
+    "Predicted SVM": y_pred_svm
+})
+
+results_df = results_df.sort_values(by="DateTime")
+results_df.to_csv("prediction_results_comparison.csv", index=False)
