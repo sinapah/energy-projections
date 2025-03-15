@@ -69,6 +69,7 @@ print(f"R² Score: {r2_dt:.4f}")
 
 # Define ANN architecture
 ann_model = Sequential([
+    Dense(128, activation='relu'),
     Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),  # Input layer
     Dense(32, activation='relu'),  # Hidden layer
     Dense(1)  # Output layer
@@ -78,7 +79,7 @@ ann_model = Sequential([
 ann_model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
-history = ann_model.fit(X_train_scaled, y_train, epochs=50, batch_size=32, validation_data=(X_test_scaled, y_test), verbose=1)
+history = ann_model.fit(X_train_scaled, y_train, epochs=100, batch_size=32, validation_data=(X_test_scaled, y_test), verbose=1)
 
 ann_model.save("ann_energy_model.h5")
 
@@ -134,5 +135,18 @@ plt.ylabel("Ontario Energy Demand")
 plt.title("Actual vs Predicted Energy Demand (ANN vs Decision Tree)")
 plt.legend()
 plt.xticks(rotation=45)
+plt.grid()
+plt.show()
+
+# ============================
+# 📉 Plot Loss vs. Epoch for ANN
+# ============================
+plt.figure(figsize=(8, 5))
+plt.plot(history.history['loss'], label='Training Loss', color='blue')
+plt.plot(history.history['val_loss'], label='Validation Loss', color='red')
+plt.xlabel("Epochs")
+plt.ylabel("Loss (MSE)")
+plt.title("ANN Training Loss vs. Epochs")
+plt.legend()
 plt.grid()
 plt.show()
