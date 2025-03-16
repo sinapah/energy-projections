@@ -109,5 +109,6 @@ energy_data["BusinessHour"] = ((energy_data["Hour"] >= 8) &
                                (energy_data["IsWeekend"] == 0) & 
                                (energy_data["IsHoliday"] == 0)).astype(int)
 
+energy_data = energy_data.dropna()
 # Step 3: Save final dataset
 energy_data.to_csv("merged_energy_weather.csv", index=False)

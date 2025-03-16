@@ -20,10 +20,10 @@ from sklearn.svm import SVR
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-
+print(df.shape)
 # Handle missing values
 df = df.dropna()
-
+print(df.shape)
 # Store datetime separately for evaluation
 datetime_col = df["DateTime"]
 
@@ -140,35 +140,42 @@ plt.grid()
 plt.show()
 
 # ============================
-# 📌 Support Vector Machine (SVM) Model
+# 📌 Support Vector Machine (SVM) Model - Use RBF (non-linear) as the Kernel
 # ============================
-svm_model = SVR(kernel='rbf', C=100, gamma=0.1, epsilon=0.1)
-svm_model.fit(X_train_scaled, y_train)
+svm_model_nl = SVR(kernel='rbf', C=100, gamma=0.1, epsilon=0.1)
+svm_model_nl.fit(X_train_scaled, y_train)
 
 # Make predictions
-y_pred_svm = svm_model.predict(X_test_scaled)
+y_pred_svm_nl = svm_model_nl.predict(X_test_scaled)
 
 # Compute evaluation metrics
-mae_svm = mean_absolute_error(y_test, y_pred_svm)
-rmse_svm = np.sqrt(mean_squared_error(y_test, y_pred_svm))
-r2_svm = r2_score(y_test, y_pred_svm)
+mae_svm = mean_absolute_error(y_test, y_pred_svm_nl)
+rmse_svm = np.sqrt(mean_squared_error(y_test, y_pred_svm_nl))
+r2_svm = r2_score(y_test, y_pred_svm_nl)
 
-print("\n📊 SVM Model Performance:")
+print("\n📊 SVM Non Linear Model Performance:")
 print(f"MAE: {mae_svm:.2f}")
 print(f"RMSE: {rmse_svm:.2f}")
 print(f"R² Score: {r2_svm:.4f}")
 
 # ============================
-# Save Results to CSV
+# 📌 Support Vector Machine (SVM) Model - Use Linear Kernel
 # ============================
-results_df = pd.DataFrame({
-    "DateTime": datetime_test.values,
-    "Actual_Ontario_Demand": y_test.values,
-    "Predicted_SVM": y_pred_svm
-})
+svm_model_linear = SVR(kernel='linear', C=100, gamma=0.1, epsilon=0.1)
+svm_model_linear.fit(X_train_scaled, y_train)
 
-results_df = results_df.sort_values(by="DateTime")
-results_df.to_csv("svm_prediction_results.csv", index=False)
+# Make predictions
+y_pred_svm_linear = svm_model_linear.predict(X_test_scaled)
+
+# Compute evaluation metrics
+mae_svm = mean_absolute_error(y_test, y_pred_svm_linear)
+rmse_svm = np.sqrt(mean_squared_error(y_test, y_pred_svm_linear))
+r2_svm = r2_score(y_test, y_pred_svm_linear)
+
+print("\n📊 SVM Linear Model Performance:")
+print(f"MAE: {mae_svm:.2f}")
+print(f"RMSE: {rmse_svm:.2f}")
+print(f"R² Score: {r2_svm:.4f}")
 
 # ============================
 # 📊 Plot Actual vs Predicted Demand (SVM)
@@ -179,7 +186,7 @@ plt.figure(figsize=(12, 6))
 sorted_indices = np.argsort(datetime_test)
 sorted_dates = np.array(datetime_test)[sorted_indices]
 sorted_actual = np.array(y_test)[sorted_indices]
-sorted_predicted_svm = np.array(y_pred_svm)[sorted_indices]
+sorted_predicted_svm = np.array(y_pred_svm_nl)[sorted_indices]
 
 # Plot actual demand
 plt.plot(sorted_dates, sorted_actual, label="Actual Demand", color="blue", linewidth=2)
@@ -203,7 +210,8 @@ results_df = pd.DataFrame({
     "Actual_Ontario_Demand": y_test.values,
     "Predicted_DT": y_pred_dt,
     "Predicted_ANN": y_pred_ann,
-    "Predicted SVM": y_pred_svm
+    "Predicted SVM - Non Linear": y_pred_svm_nl,
+    "Prediced SVM - Linear": y_pred_svm_linear
 })
 
 results_df = results_df.sort_values(by="DateTime")
