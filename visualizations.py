@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 
 # Load the dataset and parse DateTime column
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
 
 # Filter for Feb 1, 2016
-df_day = df[df["DateTime"].dt.date == pd.to_datetime("2016-02-10").date()]
+df_day = df[df["DateTime"].dt.date == pd.to_datetime("2016-08-10").date()]
 
 # Plot bar chart
 plt.figure(figsize=(10, 5))
@@ -26,7 +27,7 @@ plt.bar(df_day["Hour"], df_day["Ontario Demand"], color="blue", alpha=0.7)
 # Labels and title
 plt.xlabel("Hour of the Day")
 plt.ylabel("Energy Demand (MW)")
-plt.title("Hourly Energy Demand on February 10, 2016")
+plt.title("Hourly Energy Demand on Wednesday, August 10, 2016")
 plt.xticks(range(24))  # Ensure all hours are labeled
 
 # Show the plot
