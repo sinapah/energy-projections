@@ -26,7 +26,7 @@ plt.bar(df_day["Hour"], df_day["Ontario Demand"], color="blue", alpha=0.7)
 # Labels and title
 plt.xlabel("Hour of the Day")
 plt.ylabel("Energy Demand (MW)")
-plt.title("Hourly Energy Demand on February 1, 2016")
+plt.title("Hourly Energy Demand on February 10, 2016")
 plt.xticks(range(24))  # Ensure all hours are labeled
 
 # Show the plot
