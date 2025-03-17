@@ -17,6 +17,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 import joblib
 from sklearn.svm import SVR
+from sklearn.inspection import permutation_importance
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -50,7 +51,7 @@ X_test_scaled = scaler.transform(X_test)
 # ============================
 # 📌 Decision Tree Model
 # ============================
-dt_model = DecisionTreeRegressor(max_depth=10, min_samples_split=10)
+dt_model = DecisionTreeRegressor(max_depth=15, min_samples_split=10)
 dt_model.fit(X_train, y_train)
 y_pred_dt = dt_model.predict(X_test)
 
@@ -64,6 +65,28 @@ print(f"MAE: {mae_dt:.2f}")
 print(f"RMSE: {rmse_dt:.2f}")
 print(f"R² Score: {r2_dt:.4f}")
 
+# Get most important features
+feature_importance_dt = dt_model.feature_importances_
+
+# Convert to DataFrame for better readability
+feature_importance_df = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": feature_importance_dt
+}).sort_values(by="Importance", ascending=False)
+
+# Display top features
+print("\n🌳 Decision Tree Feature Importance:")
+print(feature_importance_df)
+
+# Plot feature importance
+plt.figure(figsize=(10, 6))
+plt.barh(feature_importance_df["Feature"], feature_importance_df["Importance"], color="blue")
+plt.xlabel("Importance")
+plt.ylabel("Feature")
+plt.title("Decision Tree Feature Importance")
+plt.gca().invert_yaxis()
+plt.show()
+
 # ============================
 # ANN Model (Neural Network)
 # ============================
@@ -71,8 +94,8 @@ print(f"R² Score: {r2_dt:.4f}")
 # Define ANN architecture
 ann_model = Sequential([
     Dense(128, activation='relu'),
-    Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),  # Input layer
-    Dense(32, activation='relu'),  # Hidden layer
+    Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),
+    Dense(32, activation='relu'),
     Dense(1)  # Output layer
 ])
 
@@ -96,6 +119,27 @@ print("\n📊 ANN Model Performance:")
 print(f"MAE: {mae_ann:.2f}")
 print(f"RMSE: {rmse_ann:.2f}")
 print(f"R² Score: {r2_ann:.4f}")
+
+# Compute feature importance via permutation
+perm_importance = permutation_importance(ann_model, X_test_scaled, y_test, scoring='neg_mean_squared_error')
+
+# Convert to DataFrame
+feature_importance_ann = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": perm_importance.importances_mean
+}).sort_values(by="Importance", ascending=False)
+
+print("\n🧠 ANN Feature Importance:")
+print(feature_importance_ann)
+
+# Plot
+plt.figure(figsize=(10, 6))
+plt.barh(feature_importance_ann["Feature"], feature_importance_ann["Importance"], color="green")
+plt.xlabel("Importance")
+plt.ylabel("Feature")
+plt.title("ANN Feature Importance (Permutation)")
+plt.gca().invert_yaxis()
+plt.show()
 
 # ============================
 # 📊 Plot Actual vs Predicted Demand (ANN & DT)
