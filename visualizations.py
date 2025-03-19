@@ -41,6 +41,24 @@ for date in dates:
     plt.tight_layout()
     plt.show()
 
+# Show hourly price average
+# Calculate the average HOEP price per hour
+hourly_price = df.groupby("Hour")["HOEP"].mean().reset_index()
+
+# Plotting
+plt.figure(figsize=(12, 6))
+plt.bar(hourly_price["Hour"], hourly_price["HOEP"], color='skyblue')
+
+# Labels and title
+plt.xlabel("Hour of the Day")
+plt.ylabel("Average HOEP Price (CAD/MWh)")
+plt.title("Average Hourly HOEP Price")
+plt.xticks(range(24))
+plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+# Show the plot
+plt.show()
+
 #=================
 #Draw Bar Graph For Comparisons
 #=================
