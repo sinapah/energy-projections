@@ -14,7 +14,6 @@ import numpy as np
 #Show sample demand for a day
 #=================
 
-
 # Load the dataset and parse DateTime column
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
