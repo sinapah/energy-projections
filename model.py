@@ -93,8 +93,8 @@ plt.show()
 
 # Define ANN architecture
 ann_model = Sequential([
-    Dense(128, activation='relu'),
-    Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),
+    Dense(128, activation='relu', input_shape=(X_train_scaled.shape[1],)),
+    Dense(64, activation='relu'),
     Dense(32, activation='relu'),
     Dense(1)  # Output layer
 ])

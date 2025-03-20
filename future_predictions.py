@@ -86,9 +86,8 @@ def predict_energy_demand(future_datetime, historical_data, model):
     return predicted_demand
 
 historical_data = pd.read_csv("merged_energy_weather.csv")  # Load dataset
-
+historical_data["DateTime"] = pd.to_datetime(historical_data["DateTime"], utc=True)
 future_dt = datetime.datetime(2025, 3, 15, 14)  # Predict for March 15, 2025, at 2 PM
-
 
 prediction = predict_energy_demand(future_dt, historical_data, model)
 print(f"Predicted energy demand for {future_dt}: {prediction}")
