@@ -18,6 +18,7 @@ from keras.layers import Dense
 import joblib
 from sklearn.svm import SVR
 from sklearn.inspection import permutation_importance
+from sklearn.tree import plot_tree
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -86,6 +87,19 @@ plt.ylabel("Feature")
 plt.title("Decision Tree Feature Importance")
 plt.gca().invert_yaxis()
 plt.show()
+
+plt.figure(figsize=(20, 12))
+
+# Plot the tree
+plot_tree(
+    dt_model,                # Your Decision Tree model
+    feature_names=X.columns, # Feature names
+    filled=True,             # Color the nodes based on the decision
+    rounded=True,            # Rounded corners for readability
+    fontsize=10               # Font size
+)
+
+plt.savefig("decision_tree_visualization.pdf", format="pdf", bbox_inches="tight")
 
 # ============================
 # ANN Model (Neural Network)
