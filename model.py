@@ -155,34 +155,6 @@ plt.title("ANN Feature Importance (Permutation)")
 plt.gca().invert_yaxis()
 plt.show()
 
-# ============================
-# 📊 Plot Actual vs Predicted Demand (ANN & DT)
-# ============================
-plt.figure(figsize=(12, 6))
-
-# Sort values for proper time-series plotting
-sorted_indices = np.argsort(datetime_test)
-sorted_dates = np.array(datetime_test)[sorted_indices]
-sorted_actual = np.array(y_test)[sorted_indices]
-sorted_predicted_dt = np.array(y_pred_dt)[sorted_indices]
-sorted_predicted_ann = np.array(y_pred_ann)[sorted_indices]
-
-# Plot actual demand
-plt.plot(sorted_dates, sorted_actual, label="Actual Demand", color="blue", linewidth=2)
-
-# Plot Decision Tree predictions
-plt.plot(sorted_dates, sorted_predicted_dt, label="Decision Tree Prediction", color="red", linestyle="dashed", linewidth=2)
-
-# Plot ANN predictions
-plt.plot(sorted_dates, sorted_predicted_ann, label="ANN Prediction", color="green", linestyle="dashed", linewidth=2)
-
-plt.xlabel("DateTime")
-plt.ylabel("Ontario Energy Demand")
-plt.title("Actual vs Predicted Energy Demand (ANN vs Decision Tree)")
-plt.legend()
-plt.xticks(rotation=45)
-plt.grid()
-plt.show()
 
 # ============================
 # 📉 Plot Loss vs. Epoch for ANN
