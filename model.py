@@ -196,7 +196,7 @@ print(f"MAE: {mae_svm:.2f}")
 print(f"RMSE: {rmse_svm:.2f}")
 print(f"R² Score: {r2_svm:.4f}")
 
-joblib.dump(svm_model_nl, "svm_model_linear.pkl")
+joblib.dump(svm_model_linear, "svm_model_linear.pkl")
 
 # ============================
 # 📊 Plot Actual vs Predicted Demand (SVM)
