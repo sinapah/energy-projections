@@ -155,20 +155,6 @@ plt.title("ANN Feature Importance (Permutation)")
 plt.gca().invert_yaxis()
 plt.show()
 
-
-# ============================
-# 📉 Plot Loss vs. Epoch for ANN
-# ============================
-plt.figure(figsize=(8, 5))
-plt.plot(history.history['loss'], label='Training Loss', color='blue')
-plt.plot(history.history['val_loss'], label='Validation Loss', color='red')
-plt.xlabel("Epochs")
-plt.ylabel("Loss (MSE)")
-plt.title("ANN Training Loss vs. Epochs")
-plt.legend()
-plt.grid()
-plt.show()
-
 # ============================
 # 📌 Support Vector Machine (SVM) Model - Use RBF (non-linear) as the Kernel
 # ============================
