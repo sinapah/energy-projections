@@ -8,136 +8,191 @@ Created on Sat Mar 22 16:31:18 2025
 
 import pandas as pd
 import numpy as np
+import threading
+import logging
 from tkinter import *
-from tkinter import messagebox, ttk
+from tkinter import messagebox, Canvas, Scrollbar, Frame, ttk
 from tkcalendar import Calendar
-import joblib
 from keras.models import load_model
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.svm import SVR
 from datetime import datetime
+import joblib
+
+# ============================
+# 📊 Logging Setup
+# ============================
+logging.basicConfig(
+    filename="simulator_logs.txt",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # ============================
 # 📊 Load Pre-trained Models
 # ============================
-# Load scaler and models
 scaler = joblib.load("scaler.pkl")
 ann_model = load_model("ann_energy_model.h5")
-lstm_model = load_model("lstm_energy_model.h5")
 dt_model = joblib.load("decision_tree_model.pkl")
-#svm_model = joblib.load("svm_model.pkl")
+svm_model_nl = joblib.load("svm_model_nl.pkl")
+svm_model_linear = joblib.load("svm_model_linear.pkl")
 
 # ============================
-# 📌 Load Dataset
+# 📌 Load and Normalize Dataset
 # ============================
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 df = df.dropna()
 
-# Extract datetime and features
+# ✅ Ensure consistent datetime format (strip timezone info)
+df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
+df["DateTime"] = df["DateTime"].dt.strftime("%Y-%m-%d %H:00:00")
+
 datetime_col = df["DateTime"]
 X = df.drop(columns=["DateTime", "Ontario Demand", "Market Demand"])
 y = df["Ontario Demand"]
 
 # ============================
-# 🔥 GUI Functions
+# 🔥 GUI Functions with Multithreading
 # ============================
 
 def get_prediction():
-    """ Get predictions using user-modified feature values """
+    """ Runs the prediction in a separate thread to prevent GUI freezing """
+    threading.Thread(target=run_prediction).start()
+
+
+def run_prediction():
+    """ Perform model predictions """
     selected_date = cal.get_date()
+    selected_hour = hour_picker.get()
 
-    # Convert date to match dataset format
-    selected_datetime = datetime.strptime(selected_date, "%m/%d/%y")
+    try:
+        # Convert selected date and hour into the proper format
+        selected_datetime = datetime.strptime(f"{selected_date} {selected_hour}:00:00", "%m/%d/%y %H:%M:%S")
+        formatted_datetime = selected_datetime.strftime("%Y-%m-%d %H:00:00")
 
-    # Check if the selected date is valid
-    if selected_datetime not in datetime_col.values:
-        messagebox.showerror("Error", "Selected date is not in the dataset.")
-        return
+        logging.info(f"Selected date and time: {formatted_datetime}")
 
-    # Get the row corresponding to the selected date
-    idx = datetime_col[datetime_col == selected_datetime].index[0]
-    
-    # Create input feature array based on user modifications
-    user_input = []
-    for entry in feature_entries:
-        value = float(entry.get())
-        user_input.append(value)
+        if formatted_datetime not in datetime_col.values:
+            messagebox.showerror("Error", "Selected date and time is not in the dataset.")
+            return
 
-    # Scale the user input
-    X_scaled = scaler.transform([user_input])
+        idx = datetime_col[datetime_col == formatted_datetime].index[0]
 
-    # ANN Prediction
-    ann_pred = ann_model.predict(X_scaled)[0][0]
+        # Prepare input features
+        user_input = []
+        for entry in feature_entries:
+            value = float(entry.get())
+            user_input.append(value)
+        
+        logging.info(f"User Input: {user_input}")
 
-    # LSTM Prediction (reshape for time series)
-    lstm_input = np.array(X_scaled).reshape(1, 1, -1)  # Reshape for LSTM input shape
-    lstm_pred = lstm_model.predict(lstm_input)[0][0]
+        # Scale the input
+        X_scaled = scaler.transform([user_input])
 
-    # Decision Tree Prediction
-    dt_pred = dt_model.predict(X_scaled)[0]
+        # Model predictions
+        ann_pred = ann_model.predict(X_scaled)[0][0]
+        dt_pred = dt_model.predict(X_scaled)[0]
+        svm_nl_pred = svm_model_nl.predict(X_scaled)[0]
+        svm_linear_pred = svm_model_linear.predict(X_scaled)[0]
 
-    # SVM Prediction
-    #svm_pred = svm_model.predict(X_scaled)[0]
+        # Actual value
+        actual = y.iloc[idx]
 
-    # Display results
-    actual = y.iloc[idx]
+        # Update the GUI with the results
+        result_text.set(f"""
+        ✅ Date: {selected_date} {selected_hour}:00
 
-    result_text.set(f"""
-    ✅ Date: {selected_date}
+        📊 Actual Demand: {actual:.2f}
 
-    📊 Actual Demand: {actual:.2f}
+        🔥 Predictions:
+        - ANN: {ann_pred:.2f}
+        - Decision Tree: {dt_pred:.2f}
+        - SVM (RBF): {svm_nl_pred:.2f}
+        - SVM (Linear): {svm_linear_pred:.2f}
+        """)
 
-    🔥 Predictions:
-    - ANN: {ann_pred:.2f}
-    - LSTM: {lstm_pred:.2f}
-    - Decision Tree: {dt_pred:.2f}
-    
-    """)
+        logging.info(f"Prediction results: ANN={ann_pred}, DT={dt_pred}, SVM_RBF={svm_nl_pred}, SVM_Linear={svm_linear_pred}")
+
+    except Exception as e:
+        logging.error(f"Error in prediction: {str(e)}")
+        messagebox.showerror("Error", f"Failed to predict: {str(e)}")
 
 
 def load_features():
-    """ Load and display the features for the selected date """
+    """ Load and display the features for the selected date and hour """
     selected_date = cal.get_date()
+    selected_hour = hour_picker.get()
 
-    # Convert date to match dataset format
-    selected_datetime = datetime.strptime(selected_date, "%m/%d/%y")
+    try:
+        # Format selected date and hour to match dataset
+        selected_datetime = datetime.strptime(f"{selected_date} {selected_hour}:00:00", "%m/%d/%y %H:%M:%S")
+        formatted_datetime = selected_datetime.strftime("%Y-%m-%d %H:00:00")
 
-    # Check if the selected date exists
-    if selected_datetime not in datetime_col.values:
-        messagebox.showerror("Error", "Selected date is not in the dataset.")
-        return
+        if formatted_datetime not in datetime_col.values:
+            messagebox.showerror("Error", "Selected date and time is not in the dataset.")
+            return
 
-    # Get the row corresponding to the selected date
-    idx = datetime_col[datetime_col == selected_datetime].index[0]
+        idx = datetime_col[datetime_col == formatted_datetime].index[0]
 
-    # Display feature values as placeholders
-    for i, col in enumerate(X.columns):
-        value = X.iloc[idx, i]
-        feature_entries[i].delete(0, END)
-        feature_entries[i].insert(0, str(value))
+        # Display feature values
+        for i, col in enumerate(X.columns):
+            value = X.iloc[idx, i]
+            feature_entries[i].delete(0, END)
+            feature_entries[i].insert(0, str(value))
+
+        logging.info(f"Loaded features for {formatted_datetime}")
+
+    except Exception as e:
+        logging.error(f"Error loading features: {str(e)}")
+        messagebox.showerror("Error", f"Failed to load features: {str(e)}")
 
 
 # ============================
-# 🛠️ GUI Setup
+# 🛠️ GUI Setup with Scrollable Frame and Hour Picker
 # ============================
+
+# Main Window
 root = Tk()
 root.title("Energy Demand Prediction Simulator")
 root.geometry("1200x700")
 
+# Create Canvas and Scrollbar
+canvas = Canvas(root)
+scrollbar = Scrollbar(root, orient=VERTICAL, command=canvas.yview)
+scrollable_frame = Frame(canvas)
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(
+        scrollregion=canvas.bbox("all")
+    )
+)
+
+# Pack canvas and scrollbar
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+canvas.pack(side=LEFT, fill=BOTH, expand=True)
+scrollbar.pack(side=RIGHT, fill=Y)
+
 # Title Label
-Label(root, text="Energy Demand Prediction Simulator", font=("Helvetica", 18, "bold")).pack(pady=10)
+Label(scrollable_frame, text="Energy Demand Prediction Simulator", font=("Helvetica", 18, "bold")).pack(pady=10)
 
 # Date Picker
-Label(root, text="Select Date:", font=("Helvetica", 12)).pack()
-cal = Calendar(root, selectmode='day', date_pattern='mm/dd/yy')
+Label(scrollable_frame, text="Select Date:", font=("Helvetica", 12)).pack()
+cal = Calendar(scrollable_frame, selectmode='day', date_pattern='mm/dd/yy')
 cal.pack(pady=10)
 
+# Hour Picker
+Label(scrollable_frame, text="Select Hour:", font=("Helvetica", 12)).pack()
+hour_picker = ttk.Combobox(scrollable_frame, values=[f"{i:02d}" for i in range(1, 24)], width=5)
+hour_picker.current(0)
+hour_picker.pack(pady=10)
+
 # Load Features Button
-btn_load = Button(root, text="Load Features", command=load_features, font=("Helvetica", 12, "bold"), bg="lightblue")
+btn_load = Button(scrollable_frame, text="Load Features", command=load_features, font=("Helvetica", 12, "bold"), bg="lightblue")
 btn_load.pack(pady=5)
 
 # Frame for Features
-frame = Frame(root)
+frame = Frame(scrollable_frame)
 frame.pack(pady=20)
 
 # Feature labels and entry fields
@@ -153,15 +208,17 @@ for i, feature in enumerate(X.columns):
     feature_entries.append(entry)
 
 # Predict Button
-btn_predict = Button(root, text="Predict", command=get_prediction, font=("Helvetica", 12, "bold"), bg="green", fg="white")
+btn_predict = Button(scrollable_frame, text="Predict", command=get_prediction, font=("Helvetica", 12, "bold"), bg="green", fg="black")
 btn_predict.pack(pady=20)
 
 # Results Display
 result_text = StringVar()
-result_label = Label(root, textvariable=result_text, font=("Helvetica", 12), justify=LEFT)
+result_label = Label(scrollable_frame, textvariable=result_text, font=("Helvetica", 12), justify=LEFT)
 result_label.pack(pady=10)
 
 # ============================
 # 🛠️ GUI Execution
 # ============================
 root.mainloop()
+
+

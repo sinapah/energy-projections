@@ -89,7 +89,7 @@ plt.gca().invert_yaxis()
 plt.show()
 
 plt.figure(figsize=(20, 12))
-
+'''
 # Plot the tree
 plot_tree(
     dt_model,                # Your Decision Tree model
@@ -100,7 +100,7 @@ plot_tree(
 )
 
 plt.savefig("decision_tree_visualization.pdf", format="pdf", bbox_inches="tight")
-
+'''
 # ============================
 # ANN Model (Neural Network)
 # ============================
@@ -134,6 +134,7 @@ print(f"MAE: {mae_ann:.2f}")
 print(f"RMSE: {rmse_ann:.2f}")
 print(f"R² Score: {r2_ann:.4f}")
 
+'''
 # Compute feature importance via permutation
 perm_importance = permutation_importance(ann_model, X_test_scaled, y_test, scoring='neg_mean_squared_error')
 
@@ -154,7 +155,7 @@ plt.ylabel("Feature")
 plt.title("ANN Feature Importance (Permutation)")
 plt.gca().invert_yaxis()
 plt.show()
-
+'''
 # ============================
 # 📌 Support Vector Machine (SVM) Model - Use RBF (non-linear) as the Kernel
 # ============================
@@ -174,6 +175,8 @@ print(f"MAE: {mae_svm:.2f}")
 print(f"RMSE: {rmse_svm:.2f}")
 print(f"R² Score: {r2_svm:.4f}")
 
+joblib.dump(svm_model_nl, "svm_model_nl.pkl")
+
 # ============================
 # 📌 Support Vector Machine (SVM) Model - Use Linear Kernel
 # ============================
@@ -192,6 +195,8 @@ print("\n📊 SVM Linear Model Performance:")
 print(f"MAE: {mae_svm:.2f}")
 print(f"RMSE: {rmse_svm:.2f}")
 print(f"R² Score: {r2_svm:.4f}")
+
+joblib.dump(svm_model_nl, "svm_model_linear.pkl")
 
 # ============================
 # 📊 Plot Actual vs Predicted Demand (SVM)
