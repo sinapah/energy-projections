@@ -14,11 +14,13 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, LSTM, Dropout
+from keras.optimizers import Adagrad
 import joblib
 from sklearn.svm import SVR
 from sklearn.inspection import permutation_importance
 from sklearn.tree import plot_tree
+from keras.regularizers import l2
 
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
@@ -117,7 +119,7 @@ ann_model = Sequential([
 ann_model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
-history = ann_model.fit(X_train_scaled, y_train, epochs=100, batch_size=32, validation_data=(X_test_scaled, y_test), verbose=1)
+history = ann_model.fit(X_train_scaled, y_train, epochs=1, batch_size=32, validation_data=(X_test_scaled, y_test), verbose=1)
 
 ann_model.save("ann_energy_model.h5")
 
@@ -156,6 +158,97 @@ plt.title("ANN Feature Importance (Permutation)")
 plt.gca().invert_yaxis()
 plt.show()
 '''
+
+# ============================
+# 📌 LSTM Model Preparation
+# ============================
+# Function to create time-series sequences
+def create_sequences(X, y, seq_len=24):
+    X_seq, y_seq = [], []
+    for i in range(len(X) - seq_len):
+        X_seq.append(X[i:i + seq_len])
+        y_seq.append(y[i + seq_len])
+    return np.array(X_seq), np.array(y_seq)
+
+# Create LSTM sequences
+SEQ_LEN = 24
+X_lstm, y_lstm = create_sequences(X_train_scaled, y_train.values, SEQ_LEN)
+X_test_lstm, y_test_lstm = create_sequences(X_test_scaled, y_test.values, SEQ_LEN)
+print(f"x_lstm {X_lstm}")
+print(f"x__testlstm {X_test_lstm}")
+print(f"y_lstm {y_lstm}")
+print(f"x_test_lst shape {X_test_lstm.shape}")
+print(y_test_lstm.shape)
+# ============================
+# 📌 LSTM Model
+# ============================
+lstm_model = Sequential()
+lstm_model.add(LSTM(64, 
+                    return_sequences=True, 
+                    kernel_regularizer=l2(0.01),  # L2 regularization
+                    input_shape=(X_lstm.shape[1], X_lstm.shape[2]),
+                    kernel_initializer='glorot_uniform'))
+lstm_model.add(Dropout(0.2))  # Dropout to avoid overfitting
+
+# Add second LSTM layer with L2 regularization
+lstm_model.add(LSTM(32, 
+                    return_sequences=True, 
+                    kernel_regularizer=l2(0.001),
+                    kernel_initializer='glorot_uniform'))  # L2 regularization
+lstm_model.add(Dropout(0.2))
+
+# Add third LSTM layer (complexity) with L2 regularization
+lstm_model.add(LSTM(16, 
+                    return_sequences=False, 
+                    kernel_regularizer=l2(0.01),
+                    kernel_initializer='glorot_uniform'))  # L2 regularization
+lstm_model.add(Dropout(0.2))
+
+# Add a Dense layer with L2 regularization
+lstm_model.add(Dense(16, activation='relu', kernel_regularizer=l2(0.001)))
+
+# Output layer
+lstm_model.add(Dense(1))
+
+lstm_model.compile(optimizer=Adagrad(learning_rate=0.015), loss='mean_absolute_error')
+
+lstm_history = lstm_model.fit(
+    X_lstm, y_lstm, 
+    epochs=5, batch_size=32, 
+    verbose=1
+)
+
+# Save the model
+lstm_model.save("lstm_energy_model.h5")
+
+# Make predictions
+y_pred_lstm = lstm_model.predict(X_test_lstm)
+
+# Check the shape of predictions before flattening
+print(f"y_pred_lstm shape: {y_pred_lstm.shape}")
+
+# If necessary, flatten the predictions (only if needed)
+y_pred_lstm = y_pred_lstm.flatten()
+print(f"y_pred_lstm shape2: {y_pred_lstm.shape}")
+
+print(y_pred_lstm[:10])
+print(y_pred_lstm[:-10:-1])
+print(y_test_lstm[:10])
+print(y_test_lstm[:-10:-1])
+# Reshape and inverse scale the predictions
+scaler = joblib.load("scaler.pkl")
+
+# Compute LSTM metrics
+mae_lstm = mean_absolute_error(y_test_lstm, y_pred_lstm)
+rmse_lstm = np.sqrt(mean_squared_error(y_test_lstm, y_pred_lstm))
+r2_lstm = r2_score(y_test_lstm, y_pred_lstm)
+
+print("\n📊 LSTM Model Performance:")
+print(f"MAE: {mae_lstm:.2f}")
+print(f"RMSE: {rmse_lstm:.2f}")
+print(f"R² Score: {r2_lstm:.4f}")
+
+
 # ============================
 # 📌 Support Vector Machine (SVM) Model - Use RBF (non-linear) as the Kernel
 # ============================
