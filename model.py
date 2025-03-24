@@ -171,7 +171,7 @@ def create_sequences(X, y, seq_len=24):
     return np.array(X_seq), np.array(y_seq)
 
 # Create LSTM sequences
-SEQ_LEN = 24
+SEQ_LEN = 96
 X_lstm, y_lstm = create_sequences(X_train_scaled, y_train.values, SEQ_LEN)
 X_test_lstm, y_test_lstm = create_sequences(X_test_scaled, y_test.values, SEQ_LEN)
 print(f"x_lstm {X_lstm}")
