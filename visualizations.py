@@ -67,7 +67,7 @@ plt.show()
 df = pd.read_csv("prediction_results_comparison.csv")
 
 # Select the first 10 rows
-df_samples = [df.head(10), df.tail(10)]
+df_samples = [df.head(50), df.tail(100)]
 
 for df_sample in df_samples:
     # Extract data
