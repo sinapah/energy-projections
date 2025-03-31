@@ -37,7 +37,7 @@ continuous_features = ["Ontario Demand", "Market Demand", "HOEP"]
 
 # Add all city-specific weather features
 for col in df.columns:
-    if col.endswith(("temperature", "humidity")):
+    if col.endswith(("temp", "humidity")):
         continuous_features.append(col)
 
 # Fit KDE models for each continuous feature
