@@ -23,6 +23,7 @@ df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
 df["Hour"] = df["DateTime"].dt.hour
 df["Month"] = df["DateTime"].dt.month
 df["DayOfWeek"] = df["DateTime"].dt.weekday
+df["Day"] = df["DateTime"].dt.day
 
 # ============================
 # 🔥 Fit PCA + KDE for Each Month-Hour Group
@@ -62,7 +63,7 @@ print(f"✅ Fitted PCA + KDE models for {len(pca_kde_models)} (month, hour) comb
 # ============================
 ontario_holidays = holidays.Canada(subdiv="ON")
 
-def generate_synthetic_time_aware_pca_kde(start_date="2025-01-01", years=5):
+def generate_synthetic_time_aware_pca_kde(start_date="2025-01-01", years=10):
     """
     Generates synthetic data for the next 5 years using time-aware PCA + KDE models.
     - start_date: Initial date for synthetic data.
@@ -77,6 +78,7 @@ def generate_synthetic_time_aware_pca_kde(start_date="2025-01-01", years=5):
     synthetic_data["Hour"] = synthetic_data["DateTime"].dt.hour
     synthetic_data["Month"] = synthetic_data["DateTime"].dt.month
     synthetic_data["DayOfWeek"] = synthetic_data["DateTime"].dt.weekday
+    synthetic_data["Day"] = synthetic_data["DateTime"].dt.day
 
     # Generate synthetic values using time-aware KDE models
     np.random.seed(42)  # For reproducibility
