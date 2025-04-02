@@ -11,10 +11,11 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
 
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
-
+'''
 # Compare each continuous feature's distribution
 for col in df.columns:
     if col not in ["DateTime", "IsWeekend", "IsHoliday", "BusinessHour"]:
@@ -112,4 +113,56 @@ for j in range(i + 1, len(axes)):
 
 plt.tight_layout()
 plt.suptitle("Box and Whisker Plots: Original vs Synthetic Data", fontsize=18, y=1.02)
+plt.show()
+'''
+### TSNE
+
+# Load data
+original_data = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+synthetic_data = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+
+# Drop DateTime column
+original_data = original_data.drop(columns=["DateTime"])
+synthetic_data = synthetic_data.drop(columns=["DateTime"])
+
+# Verify shape and column names
+print("Original shape:", original_data.shape)
+print("Synthetic shape:", synthetic_data.shape)
+
+# Ensure column names match
+assert set(original_data.columns) == set(synthetic_data.columns), "Columns do not match!"
+
+# Add labels
+original_data["label"] = "Original"
+synthetic_data["label"] = "Synthetic"
+
+# Combine datasets
+combined_data = pd.concat([original_data, synthetic_data])
+
+# Extract features and labels
+X = combined_data.drop(columns=["label"]).values
+y = np.array(combined_data["label"])  # Convert to NumPy array
+
+# Apply t-SNE for dimensionality reduction
+tsne = TSNE(n_components=2, random_state=42, perplexity=40, n_iter=5000)
+X_embedded = tsne.fit_transform(X)
+
+# Create scatter plot
+plt.figure(figsize=(9, 6))
+plt.style.use("seaborn-whitegrid")  # Cleaner background
+
+colors = {'Original': 'red', 'Synthetic': 'blue'}
+markers = {'Original': 'o', 'Synthetic': 'x'}
+
+for label in np.unique(y):
+    mask = (y == label)  # Boolean mask
+    plt.scatter(X_embedded[mask, 0], X_embedded[mask, 1], 
+                c=colors[label], label=label, alpha=0.6, 
+                marker=markers[label], s=15, edgecolors="black")  # Outlined markers
+
+# Formatting
+plt.xlabel("t-SNE Dimension 1")
+plt.ylabel("t-SNE Dimension 2")
+plt.title("t-SNE Visualization of Original vs. Synthetic Data")
+plt.legend()
 plt.show()
