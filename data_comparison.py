@@ -15,7 +15,7 @@ from sklearn.manifold import TSNE
 
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
-'''
+
 # Compare each continuous feature's distribution
 for col in df.columns:
     if col not in ["DateTime", "IsWeekend", "IsHoliday", "BusinessHour"]:
@@ -114,6 +114,7 @@ for j in range(i + 1, len(axes)):
 plt.tight_layout()
 plt.suptitle("Box and Whisker Plots: Original vs Synthetic Data", fontsize=18, y=1.02)
 plt.show()
+
 '''
 ### TSNE
 
@@ -124,8 +125,8 @@ synthetic_data = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTim
 original_data = original_data.drop(columns=("DateTime"))
 synthetic_data = synthetic_data.drop(columns=("DateTime"))
 
-original_data = original_data[:10000]
-synthetic_data = synthetic_data[:10000]
+original_data = original_data[:87601]
+synthetic_data = synthetic_data
 
 print(original_data.shape)
 print(synthetic_data.shape)
@@ -161,11 +162,12 @@ markers = {'Original': 'o', 'Synthetic': 'x'}
 for label in np.unique(y):
     mask = (y == label)  # Boolean mask
     plt.scatter(X_embedded[mask, 0], X_embedded[mask, 1], 
-                c=colors[label], label=label, alpha=0.3, 
-                marker=markers[label], s=15, edgecolors="black")  # Outlined markers
+                c=colors[label], label=label, alpha=0.2, 
+                marker=markers[label], s=7, edgecolors="black")  # Outlined markers
 
 plt.xlabel("t-SNE X (all features ex. demand)")
 plt.ylabel("t-SNE Y (hourly demand)")
-plt.title("t-SNE Visualization of Original vs. Synthetic Data")
+plt.title("t-SNE Visualization of Original vs. Multivarite KDE-based Synthetic Data")
 plt.legend()
 plt.show()
+'''

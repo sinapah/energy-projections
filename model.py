@@ -134,6 +134,16 @@ print(f"MAE: {mae_ann:.2f}")
 print(f"RMSE: {rmse_ann:.2f}")
 print(f"R² Score: {r2_ann:.4f}")
 
+plt.figure(figsize=(10, 6))
+plt.plot(history.history['loss'], label='Training Loss', color='blue')
+plt.plot(history.history['val_loss'], label='Validation Loss', color='red')
+plt.title('Training vs Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid(True)
+plt.show()
+
 '''
 # Compute feature importance via permutation
 perm_importance = permutation_importance(ann_model, X_test_scaled, y_test, scoring='neg_mean_squared_error')
