@@ -6,6 +6,7 @@ Created on Tue Apr  1 13:20:37 2025
 @author: sinap
 """
 
+'''
 import pandas as pd
 from sklearn.linear_model import Lasso
 from sklearn.preprocessing import StandardScaler
@@ -62,4 +63,22 @@ sampled_df_selected.to_csv("reduced_sample.csv", index=False)
 
 # Print the shape and preview of the updated DataFrame
 print(sampled_df_selected.shape)
+'''
+import pandas as pd
 
+# Step 1: Read the CSV file into a DataFrame
+df = pd.read_csv('merged_energy_weather.csv')
+
+# Step 2: Randomly select 5000 rows
+  # random_state is optional, it's for reproducibility
+
+# Extract features and target variable
+ # Features
+
+df = df.drop(columns=["DateTime"])
+
+sampled_df_sevenK = df.sample(n=7000, random_state=42)
+sampled_df_sevenK.to_csv("full_features_7000.csv", index=False)
+
+sampled_df_tenK = df.sample(n=10000, random_state=42)
+sampled_df_tenK.to_csv("full_features_10000.csv", index=False)

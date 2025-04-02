@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Mar 30 18:20:37 2025
+Created on Wed Apr  2 10:15:57 2025
 
 @author: sinap
 """
@@ -9,7 +9,6 @@ Created on Sun Mar 30 18:20:37 2025
 import pandas as pd
 import numpy as np
 from scipy.stats import gaussian_kde
-from sklearn.decomposition import PCA
 from datetime import datetime, timedelta
 import holidays
 
@@ -26,7 +25,7 @@ df["DayOfWeek"] = df["DateTime"].dt.weekday
 df["Day"] = df["DateTime"].dt.day
 
 # ============================
-# 🔥 Fit PCA + KDE for Each Month-Hour Group
+# 🔥 Fit Univariate KDE for Each Feature
 # ============================
 
 # Select continuous features
@@ -37,39 +36,27 @@ for col in df.columns:
     if col.endswith(("temp", "humidity")):
         continuous_features.append(col)
 
-# Dictionary to hold PCA and KDE models
-pca_kde_models = {}
+# Fit a KDE model for each feature
+kde_models = {}
 
-# Fit PCA + KDE for each (month, hour) combination
-for month in range(1, 13):
-    for hour in range(24):
-        subset = df[(df["Month"] == month) & (df["Hour"] == hour)]
-        
-        if len(subset) > 100:  # Only fit KDE if we have enough data points
-            # Apply PCA to reduce dimensionality
-            pca = PCA(n_components=min(len(continuous_features), len(subset) - 1))  
-            transformed = pca.fit_transform(subset[continuous_features])
-            
-            # Fit KDE on PCA-transformed space
-            kde = gaussian_kde(transformed.T)
+for feature in continuous_features:
+    kde = gaussian_kde(df[feature].dropna(), bw_method="scott")
+    kde_models[feature] = kde
 
-            # Store PCA and KDE model
-            pca_kde_models[(month, hour)] = (pca, kde)
-
-print(f"✅ Fitted PCA + KDE models for {len(pca_kde_models)} (month, hour) combinations.")
+print(f"✅ Fitted KDE models for {len(kde_models)} features.")
 
 # ============================
-# 🔥 Generate Synthetic Data with Time-Aware PCA + KDE
+# 🔥 Generate Synthetic Data Using Univariate KDE
 # ============================
 ontario_holidays = holidays.Canada(subdiv="ON")
 
-def generate_synthetic_time_aware_pca_kde(start_date="2025-01-01", years=10):
+def generate_synthetic_kde(start_date="2025-01-01", years=10):
     """
-    Generates synthetic data for the next 5 years using time-aware PCA + KDE models.
+    Generates synthetic data for the next X years using univariate KDE models.
     - start_date: Initial date for synthetic data.
     - years: Number of years to simulate.
     """
-    # Define the time range for 5 years (hourly intervals)
+    # Define the time range for simulation
     end_date = datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=365 * years)
     timestamps = pd.date_range(start=start_date, end=end_date, freq='H')
 
@@ -80,32 +67,11 @@ def generate_synthetic_time_aware_pca_kde(start_date="2025-01-01", years=10):
     synthetic_data["DayOfWeek"] = synthetic_data["DateTime"].dt.weekday
     synthetic_data["Day"] = synthetic_data["DateTime"].dt.day
 
-    # Generate synthetic values using time-aware KDE models
+    # Generate synthetic values using KDE models
     np.random.seed(42)  # For reproducibility
 
-    # Initialize synthetic features
     for feature in continuous_features:
-        synthetic_data[feature] = np.nan
-
-    # Generate samples
-    for i, row in synthetic_data.iterrows():
-        month, hour = row["Month"], row["Hour"]
-        
-        if (month, hour) in pca_kde_models:
-            pca, kde = pca_kde_models[(month, hour)]
-            
-            # Sample from the time-aware KDE in PCA space
-            sample = kde.resample(1).flatten()
-
-            # Inverse transform back to original space
-            synthetic_sample = pca.inverse_transform(sample)
-
-            # Assign synthetic values
-            synthetic_data.loc[i, continuous_features] = synthetic_sample
-        else:
-            # Fallback to random sampling if no KDE is available
-            for feature in continuous_features:
-                synthetic_data.loc[i, feature] = np.random.choice(df[feature].dropna())
+        synthetic_data[feature] = kde_models[feature].resample(len(synthetic_data)).flatten()
 
     # ============================
     # 🛠️ Add Business Flags
@@ -127,13 +93,12 @@ def generate_synthetic_time_aware_pca_kde(start_date="2025-01-01", years=10):
     print(f"✅ Synthetic data generated for {len(timestamps)} timestamps.")
     return synthetic_data
 
-
 # ============================
 # ✅ Example Usage
 # ============================
 
 # Generate synthetic data for the next 5 years
-synthetic_5_years = generate_synthetic_time_aware_pca_kde()
+synthetic_5_years = generate_synthetic_kde()
 
 # Display the first few rows
 print(synthetic_5_years.head())
@@ -141,11 +106,7 @@ print(synthetic_5_years.head())
 # ============================
 # 💾 Save the Synthetic Data
 # ============================
-output_file = "synthetic_data_pca_multivariate_kde.csv"
+output_file = "synthetic_data_kde_univariate.csv"
 synthetic_5_years.to_csv(output_file, index=False)
 
 print(f"✅ Synthetic data saved to '{output_file}'")
-
-
-
-
