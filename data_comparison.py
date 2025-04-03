@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+#synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+synthetic_df = pd.read_csv("synthetic_data_kde_univariate.csv", parse_dates=["DateTime"])
 
 # Compare each continuous feature's distribution
 for col in df.columns:
