@@ -9,6 +9,7 @@ Created on Mon Mar 17 12:31:19 2025
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 #=================
 #Show sample demand for a day
@@ -17,6 +18,57 @@ import numpy as np
 # Load the dataset and parse DateTime column
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
+
+
+# Extract the month and map it to a season
+def get_season(month):
+    if month in [3, 4, 5]:
+        return "Spring"
+    elif month in [6, 7, 8]:
+        return "Summer"
+    elif month in [9, 10, 11]:
+        return "Fall"
+    else:
+        return "Winter"
+
+df["Season"] = df["DateTime"].dt.month.apply(get_season)
+
+# Sort seasons properly
+season_order = ["Winter", "Spring", "Summer", "Fall"]
+
+# Plot demand levels by season
+plt.figure(figsize=(10, 6))
+sns.boxplot(x="Season", y="Ontario Demand", data=df, order=season_order, palette="coolwarm")
+
+plt.xlabel("Season")
+plt.ylabel("Demand Level")
+plt.title("Energy Demand Levels Across Seasons")
+plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+plt.show()
+
+
+# Extract the hour
+df["Hour"] = df["DateTime"].dt.hour
+
+df["Shifted_Hour"] = (df["Hour"] - 3) % 24
+
+# Compute the average demand per hour
+hourly_demand = df.groupby("Shifted_Hour")["Ontario Demand"].mean()
+
+# Plot the results
+plt.figure(figsize=(10, 5))
+sns.lineplot(x=hourly_demand.index, y=hourly_demand.values, marker="o", color="blue")
+
+plt.xlabel("Hour of the Day")
+plt.ylabel("Average Demand (MW)")
+plt.title("Average Hourly Energy Demand vs Hour of the Day")
+plt.xticks(range(0, 24))  # Ensure all hours are labeled
+plt.grid(True, linestyle="--", alpha=0.7)
+
+plt.show()
+
+'''
 
 dates = {"2016-02-22": "Monday February 22, 2016", "2016-02-21": "Sunday February 21, 2016", "2016-08-11":"Wednesday August 11, 2016", "2016-08-13": "Saturday August 13, 2016"}
 for date in dates:
@@ -101,3 +153,4 @@ for df_sample in df_samples:
     # Show plot
     plt.tight_layout()
     plt.show()
+'''
