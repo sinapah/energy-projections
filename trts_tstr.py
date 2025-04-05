@@ -20,6 +20,7 @@ import joblib
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
 #synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
+synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde.csv")
 
 real_df = real_df.drop('DateTime', axis=1)
 print(real_df.shape)
