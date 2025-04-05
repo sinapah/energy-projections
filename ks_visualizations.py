@@ -30,7 +30,7 @@ ks_df = pd.DataFrame.from_dict(ks_scores, orient='index', columns=['KS Score'])
 ks_df = ks_df.sort_values(by="KS Score", ascending=False)  # Sort for better visualization
 
 # Plot heatmap
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(18, 6))
 sns.heatmap(ks_df.T, cmap="coolwarm", linewidths=0.5, fmt=".2f")
 plt.title("Heatmap of KS Scores for Original vs. Uivariate KDE Based Synthetic Data")
 plt.xlabel("Feature")

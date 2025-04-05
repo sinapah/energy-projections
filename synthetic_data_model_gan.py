@@ -19,11 +19,14 @@ from sklearn.svm import SVR
 # Load the dataset
 df = pd.read_csv("gen_data_10k.csv")
 df["Day"] = df["Day"].round().astype(int)
+df["Hour"] = df["Hour"].round().astype(int)
+df["Month"] = df["Month"].round().astype(int)
 df["DayOfWeek"] = df["DayOfWeek"].round().astype(int)
 # Convert IsHoliday, BusinessHour, and IsWeekend to binary
 df["IsHoliday"] = (df["IsHoliday"] >= 0.3).astype(int)
 df["BusinessHour"] = (df["BusinessHour"] >= 0.3).astype(int)
 df["IsWeekend"] = (df["IsWeekend"] >= 0.3).astype(int)
+df.to_csv('gen_data_10k_cleaned.csv', index=False)
 #print(f"The range of for the IsHoliday column is {df['IsHoliday'].max() - df['IsHoliday'].min()}")
 #print(f"The range of for the BusinessHour column is {df['BusinessHour'].max() - df['BusinessHour'].min()}")
 #print(f"The range of for the IsWeekend column is {df['IsWeekend'].max() - df['IsWeekend'].min()}")

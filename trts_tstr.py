@@ -7,7 +7,6 @@ Created on Thu Apr  3 12:07:36 2025
 """
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
@@ -20,7 +19,9 @@ import joblib
 # Load datasets
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+#synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
 
+real_df = real_df.drop('DateTime', axis=1)
 print(real_df.shape)
 print(synthetic_df.shape)
 
@@ -31,7 +32,7 @@ real_df = real_df.dropna()
 synthetic_df = synthetic_df.dropna()
 
 # Extract features and target variable
-excluded_cols = ["DateTime", "Ontario Demand", "Market Demand"]
+excluded_cols = [ "Ontario Demand", "Market Demand"]
 X_real = real_df.drop(columns=excluded_cols)
 y_real = real_df["Ontario Demand"]
 X_syn = synthetic_df.drop(columns=excluded_cols)
