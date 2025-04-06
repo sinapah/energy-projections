@@ -20,6 +20,7 @@ import joblib
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 #synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
+#synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
 #synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde.csv")
 #synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
 synthetic_df = synthetic_df.round(1)
@@ -71,8 +72,8 @@ dt_model_syn.fit(X_train_syn, y_train_syn)
 y_pred_trts_dt = dt_model_real.predict(X_test_syn) ## change tot X_test_syn
 y_pred_tstr_dt = dt_model_syn.predict(X_test_real)
 
-mae_trts_dt = mean_absolute_error(y_train_syn, y_pred_trts_dt)
-rmse_trts_dt = np.sqrt(mean_squared_error(y_train_syn, y_pred_trts_dt))
+mae_trts_dt = mean_absolute_error(y_test_syn, y_pred_trts_dt)
+rmse_trts_dt = np.sqrt(mean_squared_error(y_test_syn, y_pred_trts_dt))
 r2_trts_dt = r2_score(y_test_syn, y_pred_trts_dt)  ## changet to y_test_syn
 
 mae_tstr_dt = mean_absolute_error(y_test_real, y_pred_tstr_dt)

@@ -15,6 +15,8 @@ from sklearn.manifold import TSNE
 real = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 synthetic = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv", parse_dates=["DateTime"])
 #synthetic = pd.read_csv("synthetic_data_gmm_window4.csv", parse_dates=["DateTime"])
+#synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
+synthetic_df = pd.read_csv("gen_data_10k.csv")
 
 print(synthetic.shape)
 real = real.drop(columns=["DateTime"])

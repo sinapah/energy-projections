@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 
 # Load datasets
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-#synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+#synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])gen_data_rescaled_7000x54
 synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv", parse_dates=["DateTime"])
-
+synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
 # Drop non-numeric and categorical columns
 excluded_cols = ["DateTime", "IsWeekend", "IsHoliday", "BusinessHour"]
 continuous_features = [col for col in df.columns if col not in excluded_cols]
