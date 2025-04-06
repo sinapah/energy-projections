@@ -18,14 +18,15 @@ import joblib
 
 # Load datasets
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
-#synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
-synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde.csv")
+#synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
+#synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde.csv")
+#synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
 
 real_df = real_df.drop('DateTime', axis=1)
 print(real_df.shape)
 print(synthetic_df.shape)
-
+#synthetic_df = synthetic_df.drop("DateTime", axis=1)
 synthetic_df = synthetic_df[real_df.columns]
 
 # Handle missing values
@@ -92,7 +93,7 @@ ann_model_real.fit(X_train_real_scaled, y_train_real, epochs=100, batch_size=32,
 ann_model_syn = Sequential([
     Dense(128, activation='relu', input_shape=(X_train_syn_scaled.shape[1],)),
     Dense(64, activation='relu'),
-    Dense(32, activation='relu'),
+    #Dense(32, activation='relu'),
     Dense(1)
 ])
 ann_model_syn.compile(optimizer='adam', loss='mean_squared_error')
@@ -145,5 +146,4 @@ y_pred_tstr_svm_linear = svm_linear_syn.predict(X_test_real_scaled)
 print(f"📊 SVM Linear Results:")
 print(f"SVM Linear TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_linear):.2f}")
 print(f"SVM Linear TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_linear):.2f}")
-
 

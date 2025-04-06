@@ -51,13 +51,14 @@ def build_autoencoder(input_dim, latent_dim=5):
     return autoencoder, encoder, decoder
 
 # ============================
-# 🧠 Train Autoencoder + KDE per (month, hour)
+# 🧠 Train Autoencoder + KDE per (month, 4-hour window)
 # ============================
 models_dict = {}
 
 for month in range(1, 13):
-    for hour in range(24):
-        subset = df[(df["Month"] == month) & (df["Hour"] == hour)]
+    for start_hour in range(0, 24, 4):
+        end_hour = start_hour + 3
+        subset = df[(df["Month"] == month) & (df["Hour"] >= start_hour) & (df["Hour"] <= end_hour)]
         if len(subset) > 100:
             X = subset[continuous_features].dropna().values
             scaler = StandardScaler()
@@ -69,14 +70,14 @@ for month in range(1, 13):
             latent = encoder.predict(X_scaled)
             kde = gaussian_kde(latent.T)
 
-            models_dict[(month, hour)] = {
+            models_dict[(month, start_hour)] = {
                 "scaler": scaler,
                 "encoder": encoder,
                 "decoder": decoder,
                 "kde": kde
             }
 
-print(f"✅ Trained Autoencoder + KDE models for {len(models_dict)} (month, hour) groups.")
+print(f"✅ Trained Autoencoder + KDE models for {len(models_dict)} (month, 4-hour) groups.")
 
 # ============================
 # 🔮 Generate Synthetic Data
@@ -99,14 +100,16 @@ def generate_synthetic_data(start_date="2025-01-01", years=1):
     np.random.seed(42)
     for i, row in synthetic_data.iterrows():
         month, hour = row["Month"], row["Hour"]
-        if (month, hour) in models_dict:
-            model = models_dict[(month, hour)]
+        start_hour = (hour // 4) * 4
+        key = (month, start_hour)
+
+        if key in models_dict:
+            model = models_dict[key]
             latent_sample = model["kde"].resample(1).T
             decoded_sample = model["decoder"].predict(latent_sample)[0]
             scaled_back = model["scaler"].inverse_transform([decoded_sample])[0]
             synthetic_data.loc[i, continuous_features] = scaled_back
         else:
-            # fallback
             for f in continuous_features:
                 synthetic_data.loc[i, f] = df[f].dropna().sample(1).values[0]
 
@@ -124,13 +127,16 @@ def generate_synthetic_data(start_date="2025-01-01", years=1):
     return synthetic_data
 
 # ============================
-# ✅ Generate 50 Samples
+# ✅ Generate and Save Synthetic Data
 # ============================
-synthetic_sample = generate_synthetic_data(start_date="2025-01-01", years=2)
-print(synthetic_sample)
+synthetic_sample = generate_synthetic_data(start_date="2025-01-01", years=1)
 
-# 💾 Save
-synthetic_sample.to_csv("synthetic_data_autoencoder_kde.csv", index=False)
+real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+
+synthetic_sample = synthetic_sample[real_df.columns]
+synthetic_sample.to_csv("synthetic_data_autoencoder_kde_window4.csv", index=False)
+print(synthetic_sample.head())
+
 
 
 

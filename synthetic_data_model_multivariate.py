@@ -21,7 +21,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.tree import plot_tree
 
 # Load the dataset
-df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv", parse_dates=["DateTime"])
 print(df.shape)
 # Handle missing values
 df = df.dropna()
