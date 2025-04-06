@@ -68,10 +68,3 @@ print(f"Classifier accuracy at distinguishing real vs synthetic: {clf.score(X, y
 plt.figure(figsize=(20, 10))
 plot_tree(clf.estimators_[0], feature_names=X.columns, filled=True)
 plt.show()
-
-tsne = TSNE(n_components=2, random_state=42)
-X_proj = tsne.fit_transform(X)
-
-plt.scatter(X_proj[:, 0], X_proj[:, 1], c=y, cmap="coolwarm", alpha=0.6)
-plt.title("t-SNE Projection: Real (0) vs Synthetic (1)")
-plt.show()

@@ -9,10 +9,11 @@ Created on Sun Mar 30 18:20:37 2025
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import QuantileTransformer
 from scipy.stats import gaussian_kde
 import holidays
 from tensorflow.keras import layers, models
+import tensorflow.keras.backend as K
 
 # ============================
 # 📊 Load the Historical Dataset
@@ -45,9 +46,22 @@ def build_autoencoder(input_dim, latent_dim=5):
         layers.Dense(32, activation='relu'),
         layers.Dense(input_dim)
     ])
+    
+    
+
+    def weighted_mse(weights):
+        def loss(y_true, y_pred):
+            return K.mean(K.square((y_true - y_pred) * weights), axis=-1)
+        return loss
+    
+    # weights: same shape as input_dim, emphasize humidity
+    weights = np.ones(input_dim)
+    for i, col in enumerate(continuous_features):
+        if "humidity" in col:
+            weights[i] = 2.0  # or higher if needed
 
     autoencoder = models.Sequential([encoder, decoder])
-    autoencoder.compile(optimizer='adam', loss='mse')
+    autoencoder.compile(optimizer='adam', loss=weighted_mse(weights))
     return autoencoder, encoder, decoder
 
 # ============================
@@ -61,7 +75,7 @@ for month in range(1, 13):
         subset = df[(df["Month"] == month) & (df["Hour"] >= start_hour) & (df["Hour"] <= end_hour)]
         if len(subset) > 100:
             X = subset[continuous_features].dropna().values
-            scaler = StandardScaler()
+            scaler = QuantileTransformer(output_distribution='normal')
             X_scaled = scaler.fit_transform(X)
 
             autoencoder, encoder, decoder = build_autoencoder(X_scaled.shape[1])

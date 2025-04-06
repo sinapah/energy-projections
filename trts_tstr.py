@@ -22,7 +22,8 @@ real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
 #synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde.csv")
 #synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
-
+synthetic_df = synthetic_df.round(1)
+print(synthetic_df.head)
 real_df = real_df.drop('DateTime', axis=1)
 print(real_df.shape)
 print(synthetic_df.shape)
@@ -46,13 +47,17 @@ X_real_scaled = scaler.fit_transform(X_real)
 X_syn_scaled = scaler.transform(X_syn)
 joblib.dump(scaler, "scaler.pkl")
 
-# Split real data into train-test
-X_train_real, X_test_real, y_train_real, y_test_real = train_test_split(X_real, y_real, test_size=0.2, random_state=42)
-X_train_real_scaled, X_test_real_scaled = train_test_split(X_real_scaled, test_size=0.2, random_state=42)
+# Correct order: split raw, then scale
+X_train_real, X_test_real, y_train_real, y_test_real = train_test_split(X_real, y_real, test_size=0.2)
 
-# Split synthetic data into train-test
-X_train_syn, X_test_syn, y_train_syn, y_test_syn = train_test_split(X_syn, y_syn, test_size=0.2, random_state=42)
-X_train_syn_scaled, X_test_syn_scaled = train_test_split(X_syn_scaled, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train_real_scaled = scaler.fit_transform(X_train_real)
+X_test_real_scaled = scaler.transform(X_test_real)
+
+# Do the same for synthetic
+X_train_syn, X_test_syn, y_train_syn, y_test_syn = train_test_split(X_syn, y_syn, test_size=0.2)
+X_train_syn_scaled = scaler.transform(X_train_syn)  # 🔁 Use the same scaler as real data!
+X_test_syn_scaled = scaler.transform(X_test_syn)
 
 # ============================
 # 📌 Decision Tree Model (TRTS & TSTR)
@@ -63,12 +68,12 @@ dt_model_syn = DecisionTreeRegressor(max_depth=15, min_samples_split=10)
 dt_model_syn.fit(X_train_syn, y_train_syn)
 
 # Evaluate TRTS & TSTR
-y_pred_trts_dt = dt_model_real.predict(X_test_syn)
+y_pred_trts_dt = dt_model_real.predict(X_test_syn) ## change tot X_test_syn
 y_pred_tstr_dt = dt_model_syn.predict(X_test_real)
 
-mae_trts_dt = mean_absolute_error(y_test_syn, y_pred_trts_dt)
-rmse_trts_dt = np.sqrt(mean_squared_error(y_test_syn, y_pred_trts_dt))
-r2_trts_dt = r2_score(y_test_syn, y_pred_trts_dt)
+mae_trts_dt = mean_absolute_error(y_train_syn, y_pred_trts_dt)
+rmse_trts_dt = np.sqrt(mean_squared_error(y_train_syn, y_pred_trts_dt))
+r2_trts_dt = r2_score(y_test_syn, y_pred_trts_dt)  ## changet to y_test_syn
 
 mae_tstr_dt = mean_absolute_error(y_test_real, y_pred_tstr_dt)
 rmse_tstr_dt = np.sqrt(mean_squared_error(y_test_real, y_pred_tstr_dt))
@@ -93,7 +98,7 @@ ann_model_real.fit(X_train_real_scaled, y_train_real, epochs=100, batch_size=32,
 ann_model_syn = Sequential([
     Dense(128, activation='relu', input_shape=(X_train_syn_scaled.shape[1],)),
     Dense(64, activation='relu'),
-    #Dense(32, activation='relu'),
+    Dense(32, activation='relu'),
     Dense(1)
 ])
 ann_model_syn.compile(optimizer='adam', loss='mean_squared_error')
@@ -130,7 +135,11 @@ y_pred_tstr_svm_rbf = svm_rbf_syn.predict(X_test_real_scaled)
 print(f"📊 SVM RBF Results:")
 print(f"SVM RBF TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_rbf):.2f}")
 print(f"SVM RBF TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_rbf):.2f}")
+r2_trts_svm_rbf = r2_score(y_test_syn, y_pred_trts_svm_rbf)
+r2_tstr_svm_rbf = r2_score(y_test_real, y_pred_tstr_svm_rbf)
 
+print(f"SVM RBF TRTS - R²: {r2_trts_svm_rbf:.4f}")
+print(f"SVM RBF TSTR - R²: {r2_tstr_svm_rbf:.4f}")
 # ============================
 # 📌 SVM Linear Model (TRTS & TSTR)
 # ============================
@@ -147,3 +156,8 @@ print(f"📊 SVM Linear Results:")
 print(f"SVM Linear TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_linear):.2f}")
 print(f"SVM Linear TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_linear):.2f}")
 
+r2_trts_svm_linear = r2_score(y_test_syn, y_pred_trts_svm_linear)
+r2_tstr_svm_linear = r2_score(y_test_real, y_pred_tstr_svm_linear)
+
+print(f"SVM Linear TRTS - R²: {r2_trts_svm_linear:.4f}")
+print(f"SVM Linear TSTR - R²: {r2_tstr_svm_linear:.4f}")
