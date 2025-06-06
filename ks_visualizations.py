@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 # Load datasets
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 #synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])gen_data_rescaled_7000x54
-synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv", parse_dates=["DateTime"])
 synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
 # Drop non-numeric and categorical columns
 excluded_cols = ["DateTime", "IsWeekend", "IsHoliday", "BusinessHour"]
@@ -33,7 +32,7 @@ ks_df = ks_df.sort_values(by="KS Score", ascending=False)  # Sort for better vis
 # Plot heatmap
 plt.figure(figsize=(18, 6))
 sns.heatmap(ks_df.T, cmap="coolwarm", linewidths=0.5, fmt=".2f")
-plt.title("Heatmap of KS Scores for Original vs. Uivariate KDE Based Synthetic Data")
+plt.title("Heatmap of KS Scores for Original vs. GAN Based Synthetic Data")
 plt.xlabel("Feature")
 plt.xticks(rotation=45, ha="right")
 plt.show()

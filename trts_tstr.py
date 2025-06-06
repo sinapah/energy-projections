@@ -18,10 +18,8 @@ import joblib
 
 # Load datasets
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-#synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
-synthetic_df = pd.read_csv("gen_data_10k_cleaned.csv")
-#synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
-#synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde.csv")
+synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
+
 #synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
 synthetic_df = synthetic_df.round(1)
 print(synthetic_df.head)

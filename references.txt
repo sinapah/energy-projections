@@ -1,0 +1,34 @@
+@article{berger2014kolmogorov,
+  title={Kolmogorov--smirnov test: Overview},
+  author={Berger, Vance W and Zhou, YanYan},
+  journal={Wiley statsref: Statistics reference online},
+  year={2014},
+  publisher={Wiley Online Library}
+}
+
+
+
+@article{li2023comprehensive,
+  title={A comprehensive survey on design and application of autoencoder in deep learning},
+  author={Li, Pengzhi and Pei, Yan and Li, Jianqiang},
+  journal={Applied Soft Computing},
+  volume={138},
+  pages={110176},
+  year={2023},
+  publisher={Elsevier}
+}
+
+
+
+@incollection{zhang2020support,
+  title={Support vector regression},
+  author={Zhang, Fan and O'Donnell, Lauren J},
+  booktitle={Machine learning},
+  pages={123--140},
+  year={2020},
+  publisher={Elsevier}
+}
+
+
+
+Han, S., Qubo, C. and Meng, H., 2012, June. Parameter selection in SVM with RBF kernel function. In World Automation Congress 2012 (pp. 1-4). IEEE. 

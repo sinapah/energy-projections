@@ -10,57 +10,58 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#=============================
-# Load the first dataset and calculate average hourly demand
-#=============================
+# Set style
+sns.set(style="whitegrid")
 
-# Load the synthetic dataset
-df1 = pd.read_csv("synthetic_data_pca_kde.csv")
+# =============================
+# Load Original Data
+# =============================
+df_original = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df_original["DateTime"] = pd.to_datetime(df_original["DateTime"], utc=True)
+df_original["Hour"] = df_original["DateTime"].dt.hour
+df_original["Shifted_Hour"] = (df_original["Hour"] - 3) % 24
+hourly_demand_original = df_original.groupby("Shifted_Hour")["Ontario Demand"].mean()
 
-# Extract the hour and compute the shifted hour
-df1["Shifted_Hour"] = (df1["Hour"] - 3) % 24
+# =============================
+# Load KDE Synthetic Data
+# =============================
+df_kde = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
+df_kde["Shifted_Hour"] = (df_kde["Hour"] - 3) % 24
+hourly_demand_kde = df_kde.groupby("Shifted_Hour")["Ontario Demand"].mean()
 
-# Compute the average demand per hour for df1
-hourly_demand_1 = df1.groupby("Shifted_Hour")["Ontario Demand"].mean()
+# =============================
+# Load GAN Synthetic Data
+# =============================
+df_gan = pd.read_csv("gen_data_rescaled_7000x54.csv")
+df_gan["Hour"] = df_gan["Hour"].round().astype(int)
+df_gan["Day"] = df_gan["Day"].round().astype(int)
+df_gan["Month"] = df_gan["Month"].round().astype(int)
 
-#=============================
-# Load the second dataset and calculate average hourly demand
-#=============================
+# Optional: Save the corrected version (overwrite or new file)
+df_gan.to_csv("gen_data_rescaled_7000x54_hour_fixed.csv", index=False)
+df_gan["Shifted_Hour"] = (df_gan["Hour"] - 3) % 24
+hourly_demand_gan = df_gan.groupby("Shifted_Hour")["Ontario Demand"].mean()
 
-# Load the merged dataset
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
-
-df["Hour"] = df["DateTime"].dt.hour
-
-df["Shifted_Hour"] = (df["Hour"] - 3) % 24
-
-# Compute the average demand per hour
-hourly_demand_2 = df.groupby("Shifted_Hour")["Ontario Demand"].mean()
-
-#=============================
-# Plot both datasets' hourly demand
-#=============================
-
+# =============================
+# Plot all three datasets
+# =============================
 plt.figure(figsize=(12, 6))
 
-# Plot the hourly demand for the first dataset (synthetic)
-sns.lineplot(x=hourly_demand_1.index, y=hourly_demand_1.values, marker="o", label="Synthetic Data", color="blue")
-
-# Plot the hourly demand for the second dataset (merged)
-sns.lineplot(x=hourly_demand_2.index, y=hourly_demand_2.values, marker="s", label="Original Data", color="green")
+sns.lineplot(x=hourly_demand_original.index, y=hourly_demand_original.values, label="Original Data", marker='o', color="green")
+sns.lineplot(x=hourly_demand_kde.index, y=hourly_demand_kde.values, label="KDE Synthetic", marker='s', color="blue")
+sns.lineplot(x=hourly_demand_gan.index, y=hourly_demand_gan.values, label="GAN Synthetic", marker='^', color="orange")
 
 # Customize the plot
-plt.xlabel("Hour of the Day")
-plt.ylabel("Average Demand (MW)")
-plt.title("Average Hourly Energy Demand Comparison")
-plt.xticks(range(0, 24))  # Ensure all hours are labeled
+plt.xlabel("Hour of the Day (Shifted)", fontsize=12)
+plt.ylabel("Average Ontario Demand (MW)", fontsize=12)
+plt.title("🔁 Average Hourly Ontario Demand: Original vs. KDE vs. GAN", fontsize=14)
+plt.xticks(range(0, 24))
 plt.grid(True, linestyle="--", alpha=0.7)
 plt.legend()
-
-# Show the plot
+plt.tight_layout()
 plt.show()
-'''
+
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -94,13 +95,13 @@ season_order = ["Winter", "Spring", "Summer", "Fall"]
 plt.figure(figsize=(10, 6))
 sns.boxplot(x="Season", y="Ontario Demand", data=df, order=season_order, palette="coolwarm")
 
-plt.xlabel("Season")
-plt.ylabel("Demand Level")
-plt.title("Energy Demand Levels Across Seasons")
+plt.xlabel("Season", fontsize=12)
+plt.ylabel("Demand Level", fontsize=12)
+plt.title("Energy Demand Levels Across Seasons", fontsize = 14)
 plt.grid(axis="y", linestyle="--", alpha=0.7)
 
 plt.show()
-
+'''
 
 # Extract the hour
 df["Shifted_Hour"] = (df["Hour"] - 3) % 24
