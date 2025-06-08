@@ -54,27 +54,20 @@ sns.lineplot(x=hourly_demand_gan.index, y=hourly_demand_gan.values, label="GAN S
 # Customize the plot
 plt.xlabel("Hour of the Day (Shifted)", fontsize=12)
 plt.ylabel("Average Ontario Demand (MW)", fontsize=12)
-plt.title("🔁 Average Hourly Ontario Demand: Original vs. KDE vs. GAN", fontsize=14)
+plt.title("Average Hourly Ontario Demand: Original vs. KDE vs. GAN", fontsize=14)
 plt.xticks(range(0, 24))
 plt.grid(True, linestyle="--", alpha=0.7)
 plt.legend()
 plt.tight_layout()
 plt.show()
 
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-
 #=================
 #Show sample demand for a day
 #=================
 
-# Load the dataset and parse DateTime column
-df = pd.read_csv("synthetic_data_pca_kde.csv")
-
-# Extract the month and map it to a season
+# ============================
+# 🔁 Helper: Map Month to Season
+# ============================
 def get_season(month):
     if month in [3, 4, 5]:
         return "Spring"
@@ -85,21 +78,45 @@ def get_season(month):
     else:
         return "Winter"
 
-# Apply the function to the 'Month' column to get the 'Season'
-df["Season"] = df["Month"].apply(get_season)
-
-# Sort seasons properly
 season_order = ["Winter", "Spring", "Summer", "Fall"]
 
-# Plot demand levels by season
-plt.figure(figsize=(10, 6))
-sns.boxplot(x="Season", y="Ontario Demand", data=df, order=season_order, palette="coolwarm")
+# ============================
+# 📂 Load Datasets
+# ============================
+real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+kde_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
+gan_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
 
-plt.xlabel("Season", fontsize=12)
-plt.ylabel("Demand Level", fontsize=12)
-plt.title("Energy Demand Levels Across Seasons", fontsize = 14)
-plt.grid(axis="y", linestyle="--", alpha=0.7)
+# Ensure Month column exists
+for df in [real_df, kde_df, gan_df]:
+    if "Month" not in df.columns:
+        df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True, errors='coerce')
+        df["Month"] = df["DateTime"].dt.month
+    df["Season"] = df["Month"].apply(get_season)
 
+# ============================
+# 📊 Seasonal Boxplots
+# ============================
+fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=True)
+
+sns.boxplot(x="Season", y="Ontario Demand", data=real_df, order=season_order, palette="Blues", ax=axes[0])
+axes[0].set_title("Real Data")
+axes[0].set_xlabel("Season")
+axes[0].set_ylabel("Ontario Demand")
+
+sns.boxplot(x="Season", y="Ontario Demand", data=kde_df, order=season_order, palette="Greens", ax=axes[1])
+axes[1].set_title("KDE Synthetic Data")
+axes[1].set_xlabel("Season")
+
+sns.boxplot(x="Season", y="Ontario Demand", data=gan_df, order=season_order, palette="Oranges", ax=axes[2])
+axes[2].set_title("GAN Synthetic Data")
+axes[2].set_xlabel("Season")
+
+for ax in axes:
+    ax.grid(axis="y", linestyle="--", alpha=0.5)
+
+plt.suptitle("Ontario Energy Demand Across Seasons (Real vs Synthetic)", fontsize=16)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.show()
 '''
 
