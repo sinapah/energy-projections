@@ -52,7 +52,7 @@ sns.lineplot(x=hourly_demand_kde.index, y=hourly_demand_kde.values, label="KDE S
 sns.lineplot(x=hourly_demand_gan.index, y=hourly_demand_gan.values, label="GAN Synthetic", marker='^', color="orange")
 
 # Customize the plot
-plt.xlabel("Hour of the Day (Shifted)", fontsize=12)
+plt.xlabel("Hour of the Day", fontsize=12)
 plt.ylabel("Average Ontario Demand (MW)", fontsize=12)
 plt.title("Average Hourly Ontario Demand: Original vs. KDE vs. GAN", fontsize=14)
 plt.xticks(range(0, 24))

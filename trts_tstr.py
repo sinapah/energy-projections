@@ -16,9 +16,21 @@ from keras.models import Sequential
 from keras.layers import Dense
 import joblib
 
+def save_predictions_with_timeinfo(y_true, y_pred, X_test, prefix, model_name):
+    df = pd.DataFrame({
+        "month": X_test["Month"].values,
+        "day": X_test["Day"].values,
+        "hour": X_test["Hour"].values,
+        "y_true": y_true,
+        "y_pred": y_pred,
+        "error": np.abs(np.array(y_true) - np.array(y_pred))
+    })
+    df.to_csv(f"{prefix}_{model_name}_predictions.csv", index=False)
+
+
 # Load datasets
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-synthetic_df = pd.read_csv("gen_data_rescaled_7000x54.csv")
+synthetic_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
 
 #synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
 synthetic_df = synthetic_df.round(1)
@@ -58,6 +70,8 @@ X_train_syn, X_test_syn, y_train_syn, y_test_syn = train_test_split(X_syn, y_syn
 X_train_syn_scaled = scaler.transform(X_train_syn)  # 🔁 Use the same scaler as real data!
 X_test_syn_scaled = scaler.transform(X_test_syn)
 
+print(X_test_syn.columns)
+
 # ============================
 # 📌 Decision Tree Model (TRTS & TSTR)
 # ============================
@@ -81,6 +95,9 @@ r2_tstr_dt = r2_score(y_test_real, y_pred_tstr_dt)
 print(f"📊 Decision Tree Results:")
 print(f"DT TRTS - MAE: {mae_trts_dt:.2f}, RMSE: {rmse_trts_dt:.2f}, R²: {r2_trts_dt:.4f}")
 print(f"DT TSTR - MAE: {mae_tstr_dt:.2f}, RMSE: {rmse_tstr_dt:.2f}, R²: {r2_tstr_dt:.4f}")
+
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "DecisionTree")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "DecisionTree")
 
 # ============================
 # 📌 ANN Model (TRTS & TSTR)
@@ -119,6 +136,9 @@ print(f"📊 ANN Results:")
 print(f"ANN TRTS - MAE: {mae_trts_ann:.2f}, RMSE: {rmse_trts_ann:.2f}, R²: {r2_trts_ann:.4f}")
 print(f"ANN TSTR - MAE: {mae_tstr_ann:.2f}, RMSE: {rmse_tstr_ann:.2f}, R²: {r2_tstr_ann:.4f}")
 
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "ANN")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "ANN")
+
 # ============================
 # 📌 SVM RBF Model (TRTS & TSTR)
 # ============================
@@ -139,6 +159,10 @@ r2_tstr_svm_rbf = r2_score(y_test_real, y_pred_tstr_svm_rbf)
 
 print(f"SVM RBF TRTS - R²: {r2_trts_svm_rbf:.4f}")
 print(f"SVM RBF TSTR - R²: {r2_tstr_svm_rbf:.4f}")
+
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "SVM - RBF")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "SVM - Linear")
+
 # ============================
 # 📌 SVM Linear Model (TRTS & TSTR)
 # ============================
@@ -160,3 +184,6 @@ r2_tstr_svm_linear = r2_score(y_test_real, y_pred_tstr_svm_linear)
 
 print(f"SVM Linear TRTS - R²: {r2_trts_svm_linear:.4f}")
 print(f"SVM Linear TSTR - R²: {r2_tstr_svm_linear:.4f}")
+
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "SVM - Linear")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "SVM - Linear")
