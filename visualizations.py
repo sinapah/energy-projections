@@ -118,6 +118,63 @@ for ax in axes:
 plt.suptitle("Ontario Energy Demand Across Seasons (Real vs Synthetic)", fontsize=16)
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.show()
+
+# =============================
+# 📆 Compute Average Daily Demand using Month and Day
+# =============================
+
+def compute_average_daily_demand_from_md(df, label):
+    # Round and ensure types
+    df["Month"] = df["Month"].round().astype(int)
+    df["Day"] = df["Day"].round().astype(int)
+
+    # Filter invalid days (e.g. Feb 30)
+    valid_df = df[(df["Month"] >= 1) & (df["Month"] <= 12) & (df["Day"] >= 1) & (df["Day"] <= 31)]
+    
+    # Group by Month and Day tuple
+    daily_totals = valid_df.groupby(["Month", "Day"])["Ontario Demand"].sum()
+    print(daily_totals)
+    # Compute average
+    average_daily = daily_totals.mean()
+    print(f"{label}: Average Daily Ontario Demand = {average_daily:.2f} MW")
+    return daily_totals
+
+# Apply to each dataset
+real_daily_md = compute_average_daily_demand_from_md(real_df, "Real Data")
+kde_daily_md = compute_average_daily_demand_from_md(kde_df, "KDE Synthetic")
+gan_daily_md = compute_average_daily_demand_from_md(gan_df, "GAN Synthetic")
+
+# Reformat index to show "MM-DD" for plotting
+real_plot = real_daily_md.copy()
+real_plot.index = [f"{m:02d}-{d:02d}" for m, d in real_plot.index]
+
+kde_plot = kde_daily_md.copy()
+kde_plot.index = [f"{m:02d}-{d:02d}" for m, d in kde_plot.index]
+
+gan_plot = gan_daily_md.copy()
+gan_plot.index = [f"{m:02d}-{d:02d}" for m, d in gan_plot.index]
+
+# Sort by month and day
+real_plot = real_plot.sort_index()
+kde_plot = kde_plot.sort_index()
+gan_plot = gan_plot.sort_index()
+
+# Plot
+plt.figure(figsize=(16, 6))
+sns.lineplot(data=real_plot, label="Real Data", color="green")
+sns.lineplot(data=kde_plot, label="KDE Synthetic", color="blue")
+sns.lineplot(data=gan_plot, label="GAN Synthetic", color="orange")
+
+plt.title("Daily Ontario Demand from Jan 1 to Dec 31 (Based on Month-Day)", fontsize=14)
+plt.xlabel("Month-Day")
+plt.ylabel("Total Daily Ontario Demand (MW)")
+plt.xticks(rotation=45, fontsize=8)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+
 '''
 
 # Extract the hour

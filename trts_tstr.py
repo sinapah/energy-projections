@@ -16,6 +16,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 import joblib
 
+SYNTHETIC_TYPE = "KDE" # or GAN
+
 def save_predictions_with_timeinfo(y_true, y_pred, X_test, prefix, model_name):
     df = pd.DataFrame({
         "month": X_test["Month"].values,
@@ -25,14 +27,14 @@ def save_predictions_with_timeinfo(y_true, y_pred, X_test, prefix, model_name):
         "y_pred": y_pred,
         "error": np.abs(np.array(y_true) - np.array(y_pred))
     })
-    df.to_csv(f"{prefix}_{model_name}_predictions.csv", index=False)
+    df.to_csv(f"{SYNTHETIC_TYPE} Predictions/{prefix}_{model_name}_predictions.csv", index=False)
 
 
 # Load datasets
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-synthetic_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
+#synthetic_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
 
-#synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
+synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
 synthetic_df = synthetic_df.round(1)
 print(synthetic_df.head)
 real_df = real_df.drop('DateTime', axis=1)
@@ -59,14 +61,14 @@ X_syn_scaled = scaler.transform(X_syn)
 joblib.dump(scaler, "scaler.pkl")
 
 # Correct order: split raw, then scale
-X_train_real, X_test_real, y_train_real, y_test_real = train_test_split(X_real, y_real, test_size=0.2)
+X_train_real, X_test_real, y_train_real, y_test_real = train_test_split(X_real, y_real, test_size=0.1)
 
 scaler = StandardScaler()
 X_train_real_scaled = scaler.fit_transform(X_train_real)
 X_test_real_scaled = scaler.transform(X_test_real)
 
 # Do the same for synthetic
-X_train_syn, X_test_syn, y_train_syn, y_test_syn = train_test_split(X_syn, y_syn, test_size=0.2)
+X_train_syn, X_test_syn, y_train_syn, y_test_syn = train_test_split(X_syn, y_syn, test_size=0.1)
 X_train_syn_scaled = scaler.transform(X_train_syn)  # 🔁 Use the same scaler as real data!
 X_test_syn_scaled = scaler.transform(X_test_syn)
 
@@ -161,7 +163,7 @@ print(f"SVM RBF TRTS - R²: {r2_trts_svm_rbf:.4f}")
 print(f"SVM RBF TSTR - R²: {r2_tstr_svm_rbf:.4f}")
 
 save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "SVM - RBF")
-save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "SVM - Linear")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "SVM - RBF")
 
 # ============================
 # 📌 SVM Linear Model (TRTS & TSTR)

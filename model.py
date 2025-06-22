@@ -20,6 +20,24 @@ from sklearn.svm import SVR
 from sklearn.inspection import permutation_importance
 from sklearn.tree import plot_tree
 
+import os
+
+def save_predictions_real(y_true, y_pred, X_ref, prefix, model_name):
+    if not os.path.exists("Real Predictions"):
+        os.makedirs("Real Predictions")
+
+    df_pred = pd.DataFrame({
+        "month": X_ref["Month"].values,
+        "day": X_ref["Day"].values,
+        "hour": X_ref["Hour"].values,
+        "y_true": y_true,
+        "y_pred": y_pred,
+        "error": np.abs(np.array(y_true) - np.array(y_pred))
+    })
+    df_pred.to_csv(f"Real Predictions/{prefix}_{model_name}_predictions.csv", index=False)
+
+
+
 # Load the dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 print(df.shape)
@@ -89,6 +107,8 @@ plt.gca().invert_yaxis()
 plt.show()
 
 plt.figure(figsize=(20, 12))
+save_predictions_real(y_test, y_pred_dt, X_test, "Real", "DecisionTree")
+
 '''
 # Plot the tree
 plot_tree(
@@ -144,6 +164,9 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
+save_predictions_real(y_test, y_pred_ann, X_test, "Real", "ANN")
+
+
 '''
 # Compute feature importance via permutation
 perm_importance = permutation_importance(ann_model, X_test_scaled, y_test, scoring='neg_mean_squared_error')
@@ -186,6 +209,9 @@ print(f"RMSE: {rmse_svm:.2f}")
 print(f"R² Score: {r2_svm:.4f}")
 
 joblib.dump(svm_model_nl, "svm_model_nl.pkl")
+
+save_predictions_real(y_test, y_pred_svm_nl, X_test, "Real", "SVM-RBF")
+
 
 # ============================
 # 📌 Support Vector Machine (SVM) Model - Use Linear Kernel
@@ -232,6 +258,9 @@ plt.legend()
 plt.xticks(rotation=45)
 plt.grid()
 plt.show()
+
+save_predictions_real(y_test, y_pred_svm_linear, X_test, "Real", "SVM-Linear")
+
 
 # ============================
 # Save Results to CSV
