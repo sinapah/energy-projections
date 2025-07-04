@@ -15,9 +15,7 @@ import holidays
 from tensorflow.keras import layers, models
 import tensorflow.keras.backend as K
 
-# ============================
-# 📊 Load the Historical Dataset
-# ============================
+# Load the Historical Dataset
 df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
 df["Hour"] = df["DateTime"].dt.hour
@@ -25,15 +23,11 @@ df["Month"] = df["DateTime"].dt.month
 df["DayOfWeek"] = df["DateTime"].dt.weekday
 df["Day"] = df["DateTime"].dt.day
 
-# ============================
-# 🔍 Feature Setup
-# ============================
+# Feature Setup
 continuous_features = ["Ontario Demand", "Market Demand", "HOEP"]
 continuous_features += [col for col in df.columns if col.endswith(("temp", "humidity"))]
 
-# ============================
-# 🤖 Autoencoder Definition
-# ============================
+# Autoencoder Definition
 def build_autoencoder(input_dim, latent_dim=5):
     encoder = models.Sequential([
         layers.Input(shape=(input_dim,)),
@@ -64,9 +58,7 @@ def build_autoencoder(input_dim, latent_dim=5):
     autoencoder.compile(optimizer='adam', loss=weighted_mse(weights))
     return autoencoder, encoder, decoder
 
-# ============================
-# 🧠 Train Autoencoder + KDE per (month, 4-hour window)
-# ============================
+# Train Autoencoder + KDE per (month, 4-hour window)
 models_dict = {}
 
 for month in range(1, 13):
@@ -93,9 +85,7 @@ for month in range(1, 13):
 
 print(f"✅ Trained Autoencoder + KDE models for {len(models_dict)} (month, 4-hour) groups.")
 
-# ============================
-# 🔮 Generate Synthetic Data
-# ============================
+# Generate Synthetic Data
 ontario_holidays = holidays.Canada(subdiv="ON")
 
 def generate_synthetic_data(start_date="2025-01-01", years=1):
@@ -140,9 +130,7 @@ def generate_synthetic_data(start_date="2025-01-01", years=1):
 
     return synthetic_data
 
-# ============================
-# ✅ Generate and Save Synthetic Data
-# ============================
+# Generate and Save Synthetic Data
 synthetic_sample = generate_synthetic_data(start_date="2025-01-01", years=1)
 
 real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
