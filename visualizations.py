@@ -48,13 +48,12 @@ hourly_demand_gan = df_gan.groupby("Shifted_Hour")["Ontario Demand"].mean()
 plt.figure(figsize=(12, 6))
 
 sns.lineplot(x=hourly_demand_original.index, y=hourly_demand_original.values, label="Original Data", marker='o', color="green")
-sns.lineplot(x=hourly_demand_kde.index, y=hourly_demand_kde.values, label="KDE Synthetic", marker='s', color="blue")
-sns.lineplot(x=hourly_demand_gan.index, y=hourly_demand_gan.values, label="GAN Synthetic", marker='^', color="orange")
+sns.lineplot(x=hourly_demand_kde.index, y=hourly_demand_kde.values, label="KDE", marker='s', color="blue")
+sns.lineplot(x=hourly_demand_gan.index, y=hourly_demand_gan.values, label="TimeGAN", marker='^', color="orange")
 
 # Customize the plot
-plt.xlabel("Hour of the Day", fontsize=12)
-plt.ylabel("Average Ontario Demand (MW)", fontsize=12)
-plt.title("Average Hourly Ontario Demand: Original vs. KDE vs. GAN", fontsize=14)
+plt.xlabel("Hour of Day", fontsize=14)
+plt.ylabel("Average Ontario Demand (MW)", fontsize=14)
 plt.xticks(range(0, 24))
 plt.grid(True, linestyle="--", alpha=0.7)
 plt.legend()
@@ -109,13 +108,12 @@ axes[1].set_title("KDE Synthetic Data")
 axes[1].set_xlabel("Season")
 
 sns.boxplot(x="Season", y="Ontario Demand", data=gan_df, order=season_order, palette="Oranges", ax=axes[2])
-axes[2].set_title("GAN Synthetic Data")
+axes[2].set_title("TimeGAN Synthetic Data")
 axes[2].set_xlabel("Season")
 
 for ax in axes:
     ax.grid(axis="y", linestyle="--", alpha=0.5)
 
-plt.suptitle("Ontario Energy Demand Across Seasons (Real vs Synthetic)", fontsize=16)
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.show()
 

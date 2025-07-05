@@ -55,7 +55,7 @@ def load_prediction_files(folder, source_label):
 # ===========================
 # Load Data from All Sources
 # ===========================
-df_gan = load_prediction_files("GAN Predictions", "GAN")
+df_gan = load_prediction_files("GAN Predictions", "TimeGAN")
 df_kde = load_prediction_files("KDE Predictions", "KDE")
 df_real = load_prediction_files("Real Predictions", "Real")
 
@@ -68,13 +68,14 @@ hourly_error = df_all.groupby(["hour", "Source"])["error"].mean().reset_index()
 
 plt.figure(figsize=(12, 6))
 sns.lineplot(data=hourly_error, x="hour", y="error", hue="Source", marker='o')
-plt.title("Mean Forecast Error In Prediction By Hour of Day", fontsize=14)
-plt.xlabel("Hour of Day")
-plt.ylabel("Average Absolute Error")
-plt.xticks(range(0, 24, 2))
+plt.xlabel("Hour of Day", fontsize=14)
+plt.ylabel("Average Absolute Error", fontsize=14)
+plt.xticks(range(0, 24, 2), fontsize=12)
+plt.yticks(fontsize=12)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.tight_layout()
 plt.show()
+
 
 # ===========================
 # Plot 2: Seasonal Forecast Error
@@ -85,7 +86,6 @@ seasonal_error = seasonal_error.sort_values("Season")
 
 plt.figure(figsize=(10, 6))
 sns.barplot(data=seasonal_error, x="Season", y="error", hue="Source")
-plt.title("Mean Forecast Error By Season And Data Source", fontsize=14)
 plt.xlabel("Season")
 plt.ylabel("Average Absolute Error")
 plt.grid(axis='y', linestyle='--', alpha=0.6)
