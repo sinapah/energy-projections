@@ -38,7 +38,7 @@ svm_model_linear = joblib.load("svm_model_linear.pkl")
 # ============================
 # 📌 Load and Normalize Dataset
 # ============================
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 df = df.dropna()
 
 # ✅ Ensure consistent datetime format (strip timezone info)

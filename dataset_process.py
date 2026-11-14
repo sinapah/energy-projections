@@ -99,4 +99,4 @@ energy_data["BusinessHour"] = ((energy_data["Hour"] >= 8) &
 
 energy_data = energy_data.dropna()
 # Step 3: Save final dataset
-energy_data.to_csv("merged_energy_weather.csv", index=False)
+energy_data.to_csv("data/merged_energy_weather.csv", index=False)

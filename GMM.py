@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 # ============================
 # 📊 Load the Historical Dataset
 # ============================
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
 df["Hour"] = df["DateTime"].dt.hour
 df["Month"] = df["DateTime"].dt.month
@@ -116,10 +116,10 @@ def generate_synthetic_data(start_date="2025-01-01", years=1):
 # ============================
 synthetic_sample = generate_synthetic_data(start_date="2025-01-01", years=1)
 
-real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+real_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 
 synthetic_sample = synthetic_sample[real_df.columns]
-synthetic_sample.to_csv("synthetic_data_gmm_window4.csv", index=False)
+synthetic_sample.to_csv("data/synthetic_data_gmm_window4.csv", index=False)
 print(synthetic_sample.head())
 
 # ============================

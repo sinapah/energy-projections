@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("prediction_results_comparison.csv", parse_dates=["DateTime"])
 
 # Load merged weather data
-weather_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+weather_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 
 # Calculate the absolute difference between ANN and actual demand
 df["Difference"] = abs(df["Predicted_ANN"] - df["Actual_Ontario_Demand"])

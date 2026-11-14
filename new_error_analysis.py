@@ -73,8 +73,8 @@ def load_prediction_files(folder, term_label, assume_real_train=False):
 # ===========================
 # Load Data
 # ===========================
-df_short = load_prediction_files("YearlyPredictions", "Short Term", assume_real_train=False)
-df_long = load_prediction_files("FourYearPredictions", "Long Term", assume_real_train=True)
+df_short = load_prediction_files("data/predictions/YearlyPredictions", "Short Term", assume_real_train=False)
+df_long = load_prediction_files("data/predictions/FourYearPredictions", "Long Term", assume_real_train=True)
 
 # Combine all for line plot
 df_all = pd.concat([df_short, df_long], ignore_index=True)

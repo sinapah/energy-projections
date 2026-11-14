@@ -13,9 +13,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-#synthetic_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
-synthetic_df = pd.read_csv("synthetic_data_kde_univariate.csv", parse_dates=["DateTime"])
+df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
+#synthetic_df = pd.read_csv("data/synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+synthetic_df = pd.read_csv("data/synthetic_data_kde_univariate.csv", parse_dates=["DateTime"])
 
 # Compare each continuous feature's distribution
 for col in df.columns:
@@ -120,8 +120,8 @@ plt.show()
 ### TSNE
 
 # Load data
-original_data = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-synthetic_data = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+original_data = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
+synthetic_data = pd.read_csv("data/synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
 
 original_data = original_data.drop(columns=("DateTime"))
 synthetic_data = synthetic_data.drop(columns=("DateTime"))
