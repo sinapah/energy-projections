@@ -20,7 +20,7 @@ import holidays
 # ============================
 # 📊 Load the Historical Dataset
 # ============================
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 df["DateTime"] = pd.to_datetime(df["DateTime"], utc=True)
 
 # Extract time features
@@ -111,9 +111,9 @@ print(synthetic_5_years.head())
 # ============================
 # 💾 Save the Synthetic Data
 # ============================
-synthetic_5_years.to_csv("synthetic_data_5_years.csv", index=False)
+synthetic_5_years.to_csv("data/synthetic_data_5_years.csv", index=False)
 
-print("✅ Synthetic data saved to 'synthetic_data_5_years.csv'")
+print("✅ Synthetic data saved to 'data/synthetic_data_5_years.csv'")
 
 synthetic_2025 = synthetic_5_years[(synthetic_5_years["DateTime"] >= "2025-01-01") & 
                                    (synthetic_5_years["DateTime"] < "2026-01-01")]

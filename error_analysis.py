@@ -55,9 +55,9 @@ def load_prediction_files(folder, source_label):
 # ===========================
 # Load Data from All Sources
 # ===========================
-df_gan = load_prediction_files("GAN Predictions", "TimeGAN")
-df_kde = load_prediction_files("KDE Predictions", "KDE")
-df_real = load_prediction_files("Real Predictions", "Real")
+df_gan = load_prediction_files("data/predictions/GAN Predictions", "TimeGAN")
+df_kde = load_prediction_files("data/predictions/KDE Predictions", "KDE")
+df_real = load_prediction_files("data/predictions/Real Predictions", "Real")
 
 df_all = pd.concat([df_gan, df_kde, df_real], ignore_index=True)
 

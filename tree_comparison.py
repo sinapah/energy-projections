@@ -15,7 +15,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 
 # Load the dataset
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 print(df.shape)
 # Handle missing values
 df = df.dropna()

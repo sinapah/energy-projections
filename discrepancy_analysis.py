@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("prediction_results_comparison.csv", parse_dates=["DateTime"])
 
 # Load merged weather data for time-based features
-weather_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+weather_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 df = pd.merge(df, weather_df[["DateTime", "Hour", "DayOfWeek"]], on="DateTime", how="left")
 
 # 📊 1. Calculate Variance and Std Dev by Hour

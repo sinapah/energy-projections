@@ -10,13 +10,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from data_utils import fix_gan_hours
+
 # Set style
 sns.set(style="whitegrid")
 
 # =============================
 # Load Original Data
 # =============================
-df_original = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df_original = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 df_original["DateTime"] = pd.to_datetime(df_original["DateTime"], utc=True)
 df_original["Hour"] = df_original["DateTime"].dt.hour
 df_original["Shifted_Hour"] = (df_original["Hour"] - 3) % 24
@@ -25,20 +27,14 @@ hourly_demand_original = df_original.groupby("Shifted_Hour")["Ontario Demand"].m
 # =============================
 # Load KDE Synthetic Data
 # =============================
-df_kde = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
+df_kde = pd.read_csv("data/synthetic_data_autoencoder_kde_window4.csv")
 df_kde["Shifted_Hour"] = (df_kde["Hour"] - 3) % 24
 hourly_demand_kde = df_kde.groupby("Shifted_Hour")["Ontario Demand"].mean()
 
 # =============================
 # Load GAN Synthetic Data
 # =============================
-df_gan = pd.read_csv("gen_data_rescaled_7000x54.csv")
-df_gan["Hour"] = df_gan["Hour"].round().astype(int)
-df_gan["Day"] = df_gan["Day"].round().astype(int)
-df_gan["Month"] = df_gan["Month"].round().astype(int)
-
-# Optional: Save the corrected version (overwrite or new file)
-df_gan.to_csv("gen_data_rescaled_7000x54_hour_fixed.csv", index=False)
+df_gan = fix_gan_hours()
 df_gan["Shifted_Hour"] = (df_gan["Hour"] - 3) % 24
 hourly_demand_gan = df_gan.groupby("Shifted_Hour")["Ontario Demand"].mean()
 
@@ -78,9 +74,9 @@ season_order = ["Winter", "Spring", "Summer", "Fall"]
 # ============================
 # 📂 Load Datasets
 # ============================
-real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-kde_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
-gan_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
+real_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
+kde_df = pd.read_csv("data/synthetic_data_autoencoder_kde_window4.csv")
+gan_df = pd.read_csv("data/timegan_synthetic_hour_fixed.csv")
 
 # Ensure Month column exists
 for df in [real_df, kde_df, gan_df]:

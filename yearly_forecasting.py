@@ -17,7 +17,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 
-def save_predictions_with_timeinfo_yearly(y_true, y_pred, time_df, dataset_name, model_name, mode, output_folder="FourYearPredictions"):
+def save_predictions_with_timeinfo_yearly(y_true, y_pred, time_df, dataset_name, model_name, mode, output_folder="data/predictions/FourYearPredictions"):
     os.makedirs(output_folder, exist_ok=True)
     result_df = pd.DataFrame({
         "month": time_df["Month"].values,
@@ -30,9 +30,9 @@ def save_predictions_with_timeinfo_yearly(y_true, y_pred, time_df, dataset_name,
     result_df.to_csv(f"{output_folder}/{mode}_{dataset_name}_{model_name}_predictions.csv", index=False)
 
 # Load datasets
-real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+real_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 kde_df = pd.read_csv("new_kde.csv")
-gan_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
+gan_df = pd.read_csv("data/timegan_synthetic_hour_fixed.csv")
 real_test_df = pd.read_csv("full_features_7000.csv")
 
 # Define target and features

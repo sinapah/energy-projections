@@ -19,7 +19,7 @@ from tensorflow.keras.optimizers import Adam
 # =============================
 # Save predictions to folder
 # =============================
-def save_predictions_with_timeinfo_4yr(y_true, y_pred, time_df, train_source, test_source, model_name, output_folder="YearlyPredictions"):
+def save_predictions_with_timeinfo_4yr(y_true, y_pred, time_df, train_source, test_source, model_name, output_folder="data/predictions/YearlyPredictions"):
     os.makedirs(output_folder, exist_ok=True)
     result_df = pd.DataFrame({
         "month": time_df["Month"].values,
@@ -37,10 +37,10 @@ def save_predictions_with_timeinfo_4yr(y_true, y_pred, time_df, train_source, te
 # =============================
 # Data Preparation
 # =============================
-real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-#kde_df = pd.read_csv("synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
+real_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
+#kde_df = pd.read_csv("data/synthetic_data_pca_kde.csv", parse_dates=["DateTime"])
 kde_df = pd.read_csv("new_kde.csv")
-gan_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
+gan_df = pd.read_csv("data/timegan_synthetic_hour_fixed.csv")
 
 target_col = "Ontario Demand"
 drop_cols = ["DateTime", "Ontario Demand", "Market Demand"]

@@ -23,8 +23,8 @@ from sklearn.tree import plot_tree
 import os
 
 def save_predictions_real(y_true, y_pred, X_ref, prefix, model_name):
-    if not os.path.exists("Real Predictions"):
-        os.makedirs("Real Predictions")
+    if not os.path.exists("data/predictions/Real Predictions"):
+        os.makedirs("data/predictions/Real Predictions")
 
     df_pred = pd.DataFrame({
         "month": X_ref["Month"].values,
@@ -34,12 +34,12 @@ def save_predictions_real(y_true, y_pred, X_ref, prefix, model_name):
         "y_pred": y_pred,
         "error": np.abs(np.array(y_true) - np.array(y_pred))
     })
-    df_pred.to_csv(f"Real Predictions/{prefix}_{model_name}_predictions.csv", index=False)
+    df_pred.to_csv(f"data/predictions/Real Predictions/{prefix}_{model_name}_predictions.csv", index=False)
 
 
 
 # Load the dataset
-df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
+df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
 print(df.shape)
 # Handle missing values
 df = df.dropna()

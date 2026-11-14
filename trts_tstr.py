@@ -27,14 +27,14 @@ def save_predictions_with_timeinfo(y_true, y_pred, X_test, prefix, model_name):
         "y_pred": y_pred,
         "error": np.abs(np.array(y_true) - np.array(y_pred))
     })
-    df.to_csv(f"{SYNTHETIC_TYPE} Predictions/{prefix}_{model_name}_predictions.csv", index=False)
+    df.to_csv(f"data/predictions/{SYNTHETIC_TYPE} Predictions/{prefix}_{model_name}_predictions.csv", index=False)
 
 
 # Load datasets
-real_df = pd.read_csv("merged_energy_weather.csv", parse_dates=["DateTime"])
-#synthetic_df = pd.read_csv("gen_data_rescaled_7000x54_hour_fixed.csv")
+real_df = pd.read_csv("data/merged_energy_weather.csv", parse_dates=["DateTime"])
+#synthetic_df = pd.read_csv("data/timegan_synthetic_hour_fixed.csv")
 
-synthetic_df = pd.read_csv("synthetic_data_autoencoder_kde_window4.csv")
+synthetic_df = pd.read_csv("data/synthetic_data_autoencoder_kde_window4.csv")
 synthetic_df = synthetic_df.round(1)
 print(synthetic_df.head)
 real_df = real_df.drop('DateTime', axis=1)
