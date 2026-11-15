@@ -16,7 +16,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 import joblib
 
-SYNTHETIC_TYPE = "KDE" # or GAN
+SYNTHETIC_TYPE = "GAN" # or GAN
 
 def save_predictions_with_timeinfo(y_true, y_pred, X_test, prefix, model_name):
     df = pd.DataFrame({
@@ -138,8 +138,8 @@ print(f"📊 ANN Results:")
 print(f"ANN TRTS - MAE: {mae_trts_ann:.2f}, RMSE: {rmse_trts_ann:.2f}, R²: {r2_trts_ann:.4f}")
 print(f"ANN TSTR - MAE: {mae_tstr_ann:.2f}, RMSE: {rmse_tstr_ann:.2f}, R²: {r2_tstr_ann:.4f}")
 
-save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "ANN")
-save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "ANN")
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_ann, X_test_real, "TSTR", "ANN")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_ann, X_test_syn, "TRTS", "ANN")
 
 # ============================
 # 📌 SVM RBF Model (TRTS & TSTR)
@@ -154,16 +154,16 @@ y_pred_trts_svm_rbf = svm_rbf_real.predict(X_test_syn_scaled)
 y_pred_tstr_svm_rbf = svm_rbf_syn.predict(X_test_real_scaled)
 
 print(f"📊 SVM RBF Results:")
-print(f"SVM RBF TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_rbf):.2f}")
-print(f"SVM RBF TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_rbf):.2f}")
+print(f"SVM RBF TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_rbf):.2f}, RMSE: {np.sqrt(mean_squared_error(y_test_syn, y_pred_trts_svm_rbf)):.2f}")
+print(f"SVM RBF TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_rbf):.2f}, RMSE: {np.sqrt(mean_squared_error(y_test_real, y_pred_tstr_svm_rbf)):.2f}")
 r2_trts_svm_rbf = r2_score(y_test_syn, y_pred_trts_svm_rbf)
 r2_tstr_svm_rbf = r2_score(y_test_real, y_pred_tstr_svm_rbf)
 
 print(f"SVM RBF TRTS - R²: {r2_trts_svm_rbf:.4f}")
 print(f"SVM RBF TSTR - R²: {r2_tstr_svm_rbf:.4f}")
 
-save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "SVM - RBF")
-save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "SVM - RBF")
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_svm_rbf, X_test_real, "TSTR", "SVM - RBF")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_svm_rbf, X_test_syn, "TRTS", "SVM - RBF")
 
 # ============================
 # 📌 SVM Linear Model (TRTS & TSTR)
@@ -178,8 +178,8 @@ y_pred_trts_svm_linear = svm_linear_real.predict(X_test_syn_scaled)
 y_pred_tstr_svm_linear = svm_linear_syn.predict(X_test_real_scaled)
 
 print(f"📊 SVM Linear Results:")
-print(f"SVM Linear TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_linear):.2f}")
-print(f"SVM Linear TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_linear):.2f}")
+print(f"SVM Linear TRTS - MAE: {mean_absolute_error(y_test_syn, y_pred_trts_svm_linear):.2f}, RMSE: {np.sqrt(mean_squared_error(y_test_syn, y_pred_trts_svm_linear)):.2f}")
+print(f"SVM Linear TSTR - MAE: {mean_absolute_error(y_test_real, y_pred_tstr_svm_linear):.2f}, RMSE: {np.sqrt(mean_squared_error(y_test_real, y_pred_tstr_svm_linear)):.2f}")
 
 r2_trts_svm_linear = r2_score(y_test_syn, y_pred_trts_svm_linear)
 r2_tstr_svm_linear = r2_score(y_test_real, y_pred_tstr_svm_linear)
@@ -187,5 +187,5 @@ r2_tstr_svm_linear = r2_score(y_test_real, y_pred_tstr_svm_linear)
 print(f"SVM Linear TRTS - R²: {r2_trts_svm_linear:.4f}")
 print(f"SVM Linear TSTR - R²: {r2_tstr_svm_linear:.4f}")
 
-save_predictions_with_timeinfo(y_test_real, y_pred_tstr_dt, X_test_real, "TSTR", "SVM - Linear")
-save_predictions_with_timeinfo(y_test_syn, y_pred_trts_dt, X_test_syn, "TRTS", "SVM - Linear")
+save_predictions_with_timeinfo(y_test_real, y_pred_tstr_svm_linear, X_test_real, "TSTR", "SVM - Linear")
+save_predictions_with_timeinfo(y_test_syn, y_pred_trts_svm_linear, X_test_syn, "TRTS", "SVM - Linear")
